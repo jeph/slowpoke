@@ -1,5 +1,6 @@
 mod commands;
 use crate::commands::ping::ping;
+use crate::commands::eight_ball::eight_ball;
 use dotenvy::dotenv;
 use poise::serenity_prelude::{
   ActivityData, ActivityType, ClientBuilder, GatewayIntents,
@@ -19,7 +20,7 @@ async fn main() {
 
   let framework = poise::Framework::builder()
     .options(FrameworkOptions {
-      commands: vec![ping()],
+      commands: vec![ping(), eight_ball()],
       ..Default::default()
     })
     .setup(|context, _ready, framework| {

@@ -1,9 +1,10 @@
 use std::time::{SystemTime, UNIX_EPOCH};
+use poise::command;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
-#[poise::command(slash_command, prefix_command)]
+#[command(slash_command, prefix_command)]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
   let now = SystemTime::now();
   let current_epoch_ms = now.duration_since(UNIX_EPOCH).unwrap().as_millis() as i64;

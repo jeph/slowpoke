@@ -7,3 +7,4 @@ edition = "2021"
 dotenvy = "0.15.7"
 poise = "0.6.1"
 tokio = { version = "1.44.1", features = ["full"] }
+rand = "0.8.5"
