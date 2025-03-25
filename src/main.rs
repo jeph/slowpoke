@@ -29,7 +29,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
           .await?;
 
         let activity_data = ActivityData {
-          name: "Pokemon".to_owned(),
+          name: "Pokémon".to_owned(),
           kind: ActivityType::Playing,
           state: None,
           url: None,
