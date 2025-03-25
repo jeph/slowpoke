@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-dotenvy = "0.15.7"
 poise = "0.6.1"
 tokio = { version = "1.44.1", features = ["full"] }
 rand = "0.8.5"
+shuttle-runtime = "0.53.0"
+shuttle-serenity = "0.53.0"

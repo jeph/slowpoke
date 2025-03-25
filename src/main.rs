@@ -1,22 +1,22 @@
 mod commands;
-use crate::commands::ping::ping;
 use crate::commands::eight_ball::eight_ball;
-use dotenvy::dotenv;
+use crate::commands::ping::ping;
 use poise::serenity_prelude::{
   ActivityData, ActivityType, ClientBuilder, GatewayIntents,
 };
 use poise::FrameworkOptions;
+use shuttle_runtime::SecretStore;
+use shuttle_serenity::ShuttleSerenity;
 use std::env;
 
 struct Data {}
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
-#[tokio::main]
-async fn main() {
-  dotenv().ok();
-
-  let token =
-    env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN was not found in the environment");
+#[shuttle_runtime::main]
+async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleSerenity {
+  let token = secret_store
+    .get("DISCORD_TOKEN")
+    .expect("DISCORD_TOKEN was not found");
 
   let framework = poise::Framework::builder()
     .options(FrameworkOptions {
@@ -29,7 +29,7 @@ async fn main() {
           .await?;
 
         let activity_data = ActivityData {
-          name: "Pokemon".to_string(),
+          name: "Pokemon".to_owned(),
           kind: ActivityType::Playing,
           state: None,
           url: None,
@@ -44,6 +44,8 @@ async fn main() {
 
   let client = ClientBuilder::new(token, intents)
     .framework(framework)
-    .await;
-  client.unwrap().start().await.unwrap();
+    .await
+    .map_err(shuttle_runtime::CustomError::new)?;
+
+  Ok(client.into())
 }
