@@ -4,21 +4,25 @@ use crate::commands::ping::ping;
 use poise::serenity_prelude::{
   ActivityData, ActivityType, ClientBuilder, GatewayIntents,
 };
-use poise::FrameworkOptions;
+use poise::{Framework, FrameworkOptions};
 use shuttle_runtime::SecretStore;
 use shuttle_serenity::ShuttleSerenity;
 use std::env;
+use tracing::info;
 
 struct Data {}
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
 #[shuttle_runtime::main]
 async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleSerenity {
+  info!("Getting discord token from secret store");
   let token = secret_store
     .get("DISCORD_TOKEN")
     .expect("DISCORD_TOKEN was not found");
+  info!("Successfully got discord token from secret store");
 
-  let framework = poise::Framework::builder()
+  info!("Setting up the bot");
+  let framework = Framework::builder()
     .options(FrameworkOptions {
       commands: vec![ping(), eight_ball()],
       ..Default::default()
@@ -46,6 +50,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .framework(framework)
     .await
     .map_err(shuttle_runtime::CustomError::new)?;
+  info!("Successfully set up the bot");
 
   Ok(client.into())
 }
