@@ -2,3 +2,4 @@
 .idea
 Secrets*.toml
 .shuttle*
+.DS_Store
