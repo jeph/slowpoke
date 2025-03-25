@@ -29,7 +29,7 @@ pub async fn eight_ball(
     .unwrap()
     .to_string();
 
-  let embed = CreateEmbed::default().title("The 8 Ball Has Spoken");
+  let embed = CreateEmbed::default().title("8 Ball Has Spoken");
   let embed = match question {
     Some(question) => embed.field(
       format!("❓ {}", question),
