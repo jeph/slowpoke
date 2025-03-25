@@ -2027,6 +2027,7 @@ dependencies = [
  "shuttle-runtime",
  "shuttle-serenity",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
