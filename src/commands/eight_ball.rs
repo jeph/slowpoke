@@ -1,4 +1,5 @@
-use poise::command;
+use poise::serenity_prelude::CreateEmbed;
+use poise::{command, CreateReply};
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
 
@@ -19,11 +20,26 @@ const EIGHT_BALL_RESPONSES: &[&str] = &[
 ];
 
 #[command(slash_command, prefix_command, rename = "8ball")]
-pub async fn eight_ball(ctx: Context<'_>) -> Result<(), Error> {
+pub async fn eight_ball(
+  ctx: Context<'_>,
+  #[description = "Question for the 8 ball"] question: Option<String>,
+) -> Result<(), Error> {
   let eight_ball_response = EIGHT_BALL_RESPONSES
     .choose(&mut thread_rng())
     .unwrap()
     .to_string();
-  ctx.say(eight_ball_response).await?;
+
+  let embed = CreateEmbed::default().title("The 8 Ball Has Spoken");
+  let embed = match question {
+    Some(question) => embed.field(
+      format!("❓ {}", question),
+      format!("🎱 {}", eight_ball_response),
+      false,
+    ),
+    None => embed.description(format!("🎱 {}", eight_ball_response)),
+  };
+  let builder = CreateReply::default().embed(embed);
+
+  ctx.send(builder).await?;
   Ok(())
 }
