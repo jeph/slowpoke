@@ -7,6 +7,6 @@ edition = "2021"
 poise = "0.6.1"
 tokio = { version = "1.44.1", features = ["full"] }
 rand = "0.8.5"
-shuttle-runtime = "0.53.0"
+shuttle-runtime = { version = "0.53.0", features = ["setup-otel-exporter"] }
 shuttle-serenity = "0.53.0"
 tracing = "0.1.41"
