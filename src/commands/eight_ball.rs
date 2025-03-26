@@ -8,16 +8,26 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
 const EIGHT_BALL_RESPONSES: &[&str] = &[
-  "Maybe",
-  "Ask again later",
-  "Definitely",
-  "Absolutely not",
-  "I wouldn't count on it",
   "It is certain",
-  "Don't count on it",
+  "Reply hazy, try again",
+  "Don’t count on it",
+  "It is decidedly so",
+  "Ask again later",
+  "My reply is no",
+  "Without a doubt",
+  "Better not tell you now",
   "My sources say no",
-  "Yes, in due time",
+  "Yes definitely",
+  "Cannot predict now",
+  "Outlook not so good",
+  "You may rely on it",
+  "Concentrate and ask again",
   "Very doubtful",
+  "As I see it, yes",
+  "Most likely",
+  "Outlook good",
+  "Yes",
+  "Signs point to yes",
 ];
 
 #[command(slash_command, prefix_command, rename = "8ball")]
@@ -35,11 +45,15 @@ pub async fn eight_ball(
   let embed = match question {
     Some(question) => {
       info!("Received question. Formatting question in the embed.");
-      embed.field(
-        format!("❓ {}", question),
-        format!("🎱 {}", eight_ball_response),
-        false,
-      )
+      if question.len() > 254 {
+        embed.description("🎱 Your question is too long! Try a shorter question.")
+      } else {
+        embed.field(
+          format!("❓ {}", question),
+          format!("🎱 {}", eight_ball_response),
+          false,
+        )
+      }
     }
     None => {
       info!("Received no question. Returning without a question in the embed.");
