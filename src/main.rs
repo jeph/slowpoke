@@ -1,6 +1,10 @@
 mod commands;
+mod utils;
+
 use crate::commands::eight_ball::eight_ball;
 use crate::commands::ping::ping;
+use crate::commands::prompt::prompt;
+use crate::utils::gemini_client::GeminiClient;
 use poise::serenity_prelude::{
   ActivityData, ActivityType, ClientBuilder, GatewayIntents,
 };
@@ -10,7 +14,10 @@ use shuttle_serenity::ShuttleSerenity;
 use std::env;
 use tracing::info;
 
-struct Data {}
+struct Data {
+  gemini_client: GeminiClient,
+}
+
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
 #[shuttle_runtime::main]
@@ -21,10 +28,15 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .expect("DISCORD_TOKEN was not found");
   info!("Successfully got discord token from secret store");
 
+  let gemini_api_key = secret_store
+    .get("GEMINI_API_KEY")
+    .expect("GEMINI_API_KEY was not found");
+  let gemini_client = GeminiClient::new(gemini_api_key, reqwest::Client::new());
+
   info!("Setting up the bot");
   let framework = Framework::builder()
     .options(FrameworkOptions {
-      commands: vec![ping(), eight_ball()],
+      commands: vec![ping(), eight_ball(), prompt()],
       ..Default::default()
     })
     .setup(|context, _ready, framework| {
@@ -39,7 +51,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
           url: None,
         };
         context.set_activity(Some(activity_data));
-        Ok(Data {})
+        Ok(Data { gemini_client })
       })
     })
     .build();
