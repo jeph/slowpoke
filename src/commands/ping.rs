@@ -4,7 +4,11 @@ use std::time::{SystemTime, UNIX_EPOCH};
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
-#[command(slash_command, prefix_command)]
+#[command(
+  slash_command,
+  prefix_command,
+  description_localized("en-US", "Test the bot's latency")
+)]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
   let now = SystemTime::now();
   let current_epoch_ms = now.duration_since(UNIX_EPOCH).unwrap().as_millis() as i64;

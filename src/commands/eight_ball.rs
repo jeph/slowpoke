@@ -30,7 +30,12 @@ const EIGHT_BALL_RESPONSES: &[&str] = &[
   "Signs point to yes",
 ];
 
-#[command(slash_command, prefix_command, rename = "8ball")]
+#[command(
+  slash_command,
+  prefix_command,
+  rename = "8ball",
+  description_localized("en-US", "Ask the 8 ball a question")
+)]
 pub async fn eight_ball(
   ctx: Context<'_>,
   #[description = "Question for the 8 ball"] question: Option<String>,
