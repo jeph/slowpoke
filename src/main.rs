@@ -12,10 +12,12 @@ use poise::{Framework, FrameworkOptions};
 use shuttle_runtime::SecretStore;
 use shuttle_serenity::ShuttleSerenity;
 use std::env;
+use text_splitter::{Characters, MarkdownSplitter};
 use tracing::info;
 
 struct Data {
   gemini_client: GeminiClient,
+  markdown_splitter: MarkdownSplitter<Characters>,
 }
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -32,6 +34,8 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .get("GEMINI_API_KEY")
     .expect("GEMINI_API_KEY was not found");
   let gemini_client = GeminiClient::new(gemini_api_key, reqwest::Client::new());
+
+  let markdown_splitter = MarkdownSplitter::new(4096);
 
   info!("Setting up the bot");
   let framework = Framework::builder()
@@ -51,7 +55,10 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
           url: None,
         };
         context.set_activity(Some(activity_data));
-        Ok(Data { gemini_client })
+        Ok(Data {
+          gemini_client,
+          markdown_splitter,
+        })
       })
     })
     .build();
