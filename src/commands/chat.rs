@@ -41,9 +41,14 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
     .cloned()
     .collect::<Vec<Message>>();
   let messages = messages.iter().fold("".to_owned(), |acc, message| {
+    let name = message
+      .author
+      .global_name
+      .as_deref()
+      .unwrap_or(&message.author.name);
     format!(
       "{}[{}][{}]: {}",
-      acc, message.author.name, message.author.bot, message.content
+      acc, name, message.author.bot, message.content
     )
   });
 
