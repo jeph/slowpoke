@@ -5,10 +5,6 @@ use poise::{command, CreateReply};
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
-const PROMPT_SYSTEM_INSTRUCTION: &str = "Return your response in markdown. Give as complete of an answer \
-as possible. Assume whoever you're talking to will not be able to respond back so do not ask for \
-follow-ups. Do not hallucinate.";
-
 #[command(
   slash_command,
   prefix_command,
@@ -58,3 +54,7 @@ pub async fn prompt(
 
   Ok(())
 }
+
+const PROMPT_SYSTEM_INSTRUCTION: &str = r#"Return your response in markdown. Give as complete of an
+answer as possible. Assume whoever you're talking to will not be able to respond back so do not ask
+for follow-ups. Do not hallucinate."#;
