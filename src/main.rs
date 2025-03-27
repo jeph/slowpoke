@@ -1,6 +1,7 @@
 mod commands;
 mod utils;
 
+use crate::commands::chat::chat;
 use crate::commands::eight_ball::eight_ball;
 use crate::commands::ping::ping;
 use crate::commands::prompt::prompt;
@@ -40,7 +41,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
   info!("Setting up the bot");
   let framework = Framework::builder()
     .options(FrameworkOptions {
-      commands: vec![ping(), eight_ball(), prompt()],
+      commands: vec![ping(), eight_ball(), prompt(), chat()],
       ..Default::default()
     })
     .setup(|context, _ready, framework| {
