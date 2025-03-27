@@ -5,7 +5,7 @@ use poise::{command, CreateReply};
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
-const SYSTEM_INSTRUCTION: &str = "Return your response in markdown. Give as complete of an answer \
+const PROMPT_SYSTEM_INSTRUCTION: &str = "Return your response in markdown. Give as complete of an answer \
 as possible. Assume whoever you're talking to will not be able to respond back so do not ask for \
 follow-ups. Do not hallucinate.";
 
@@ -21,7 +21,7 @@ pub async fn prompt(
 ) -> Result<(), Error> {
   let gemini_client = &ctx.data().gemini_client;
   let markdown_splitter = &ctx.data().markdown_splitter;
-  let system_instruction = Some(SYSTEM_INSTRUCTION.to_owned());
+  let system_instruction = Some(PROMPT_SYSTEM_INSTRUCTION.to_owned());
 
   // As LLMs take some time to respond, defer must be called first in order to keep
   // the interaction alive.
