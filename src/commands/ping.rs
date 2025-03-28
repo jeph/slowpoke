@@ -1,22 +1,36 @@
-use poise::command;
-use std::time::{SystemTime, UNIX_EPOCH};
+use poise::serenity_prelude::CreateEmbed;
+use poise::{command, CreateReply};
+use std::time::{Duration, Instant};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
 #[command(
   slash_command,
-  prefix_command,
   description_localized("en-US", "Test the bot's latency")
 )]
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
-  let now = SystemTime::now();
-  let current_epoch_ms = now.duration_since(UNIX_EPOCH).unwrap().as_millis() as i64;
+  let ping_embed = CreateReply::default().embed(
+    CreateEmbed::default()
+      .title("🌐 Ping!")
+      .description("Pinging..."),
+  );
+  let start = Instant::now();
+  let response = ctx.send(ping_embed).await?;
+  let finish = start.elapsed();
 
-  let msg_timestamp_ms = ctx.created_at().timestamp_millis();
+  // Wait for 1 second so the user can see the "Pinging..." message
+  tokio::time::sleep(Duration::from_secs(1)).await;
 
-  let elapsed_time_ms = current_epoch_ms - msg_timestamp_ms;
-  let response = format!("pong! latency: {} ms", elapsed_time_ms);
-  ctx.say(response).await?;
+  response
+    .edit(
+      ctx,
+      CreateReply::default().embed(
+        CreateEmbed::default()
+          .title("🏓 Pong!")
+          .description(format!("Latency: {} ms", finish.as_millis())),
+      ),
+    )
+    .await?;
   Ok(())
 }
