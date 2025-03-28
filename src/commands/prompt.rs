@@ -40,10 +40,18 @@ pub async fn prompt(
     .iter()
     .enumerate()
     .map(|(index, response)| {
-      let footer = format!("{} / {}", index + 1, responses.len());
-      let embed = CreateEmbed::default()
-        .description(response.to_owned())
-        .footer(CreateEmbedFooter::new(footer));
+      let footer = if responses.len() != 1 {
+        Some(format!("{} / {}", index + 1, responses.len()))
+      } else {
+        None
+      };
+
+      let embed = CreateEmbed::default().description(response.to_owned());
+      let embed = match footer {
+        Some(footer) => embed.footer(CreateEmbedFooter::new(footer)),
+        None => embed,
+      };
+
       CreateReply::default().embed(embed)
     })
     .collect::<Vec<CreateReply>>();
