@@ -1,4 +1,4 @@
-use poise::serenity_prelude::{CreateEmbed, GetMessages, Message};
+use poise::serenity_prelude::{CreateEmbed, GetMessages};
 use poise::{command, CreateReply};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -9,15 +9,10 @@ type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
   description_localized("en-US", "Thanks for the invite, asshole")
 )]
 pub async fn tfti(ctx: Context<'_>) -> Result<(), Error> {
-  let messages = ctx
+  let tfti_multiplier = ctx
     .channel_id()
     .messages(ctx.http(), GetMessages::new().limit(18))
     .await?
-    .iter()
-    .cloned()
-    .collect::<Vec<Message>>();
-
-  let tfti_multiplier = messages
     .iter()
     .take_while(|message| {
       let is_bot_message = message.author.id == ctx.framework().bot_id;
