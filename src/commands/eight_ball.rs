@@ -1,4 +1,4 @@
-use poise::serenity_prelude::CreateEmbed;
+use poise::serenity_prelude::{Color, CreateEmbed};
 use poise::{command, CreateReply};
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
@@ -50,6 +50,21 @@ const EIGHT_BALL_RESPONSES: &[&str] = &[
   "No, and don’t ask again",
 ];
 
+const COLORS: [(u8, u8, u8); 12] = [
+  (245, 194, 231),
+  (203, 166, 247),
+  (243, 139, 168),
+  (235, 160, 172),
+  (250, 179, 135),
+  (249, 226, 175),
+  (166, 227, 161),
+  (148, 226, 213),
+  (137, 220, 235),
+  (116, 199, 236),
+  (137, 180, 250),
+  (180, 190, 254),
+];
+
 #[command(
   slash_command,
   rename = "8ball",
@@ -64,8 +79,11 @@ pub async fn eight_ball(
     .choose(&mut thread_rng())
     .unwrap()
     .to_string();
+  let color = COLORS.choose(&mut thread_rng()).unwrap();
 
-  let embed = CreateEmbed::default().title("8 Ball Has Spoken");
+  let embed = CreateEmbed::default()
+    .color(Color::from_rgb(color.0, color.1, color.2))
+    .title("8 Ball Has Spoken");
   let embed = match question {
     Some(question) => {
       info!("Received question. Formatting question in the embed.");
