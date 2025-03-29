@@ -9,20 +9,24 @@ type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
   description_localized("en-US", "Thanks for the invite, asshole")
 )]
 pub async fn tfti(ctx: Context<'_>) -> Result<(), Error> {
-  let tfti_multiplier = ctx
+  let tfti_multiplier = match ctx
     .channel_id()
     .messages(ctx.http(), GetMessages::new().limit(18))
-    .await?
-    .iter()
-    .take_while(|message| {
-      let is_bot_message = message.author.id == ctx.framework().bot_id;
-      let is_tfti = message.embeds.iter().any(|embed| match &embed.title {
-        Some(title) => title.contains("😤 Tfti"),
-        None => false,
-      });
-      is_bot_message && is_tfti
-    })
-    .count();
+    .await
+  {
+    Ok(messages) => messages
+      .iter()
+      .take_while(|message| {
+        let is_bot_message = message.author.id == ctx.framework().bot_id;
+        let is_tfti = message.embeds.iter().any(|embed| match &embed.title {
+          Some(title) => title.contains("😤 Tfti"),
+          None => false,
+        });
+        is_bot_message && is_tfti
+      })
+      .count(),
+    Err(_) => 0,
+  };
 
   let embed = CreateEmbed::default()
     .url("https://youtube.com/shorts/pFmq2xu8Hvw?si=ysapcGMaM6YqEcOI");
