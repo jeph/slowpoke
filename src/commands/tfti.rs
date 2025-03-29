@@ -11,7 +11,7 @@ type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 pub async fn tfti(ctx: Context<'_>) -> Result<(), Error> {
   let tfti_multiplier = match ctx
     .channel_id()
-    .messages(ctx.http(), GetMessages::new().limit(18))
+    .messages(ctx.http(), GetMessages::new().limit(9))
     .await
   {
     Ok(messages) => messages
