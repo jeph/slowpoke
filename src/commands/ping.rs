@@ -1,4 +1,4 @@
-use poise::serenity_prelude::CreateEmbed;
+use poise::serenity_prelude::{Color, CreateEmbed};
 use poise::{command, CreateReply};
 use std::time::{Duration, Instant};
 
@@ -12,6 +12,7 @@ type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
   let ping_embed = CreateReply::default().embed(
     CreateEmbed::default()
+      .color(Color::from_rgb(250, 179, 135))
       .title("🌐 Ping!")
       .description("Pinging..."),
   );
@@ -27,6 +28,7 @@ pub async fn ping(ctx: Context<'_>) -> Result<(), Error> {
       ctx,
       CreateReply::default().embed(
         CreateEmbed::default()
+          .color(Color::from_rgb(116, 199, 236))
           .title("🏓 Pong!")
           .description(format!("Latency: {} ms", finish.as_millis())),
       ),

@@ -6,11 +6,7 @@ use shuttle_serenity::serenity::all::Message;
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
-#[command(
-  slash_command,
-  prefix_command,
-  description_localized("en-US", "Chat with slowpoke")
-)]
+#[command(slash_command, description_localized("en-US", "Chat with slowpoke"))]
 pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
   let gemini_client = &ctx.data().gemini_client;
   let system_instruction = Some(CHAT_SYSTEM_INSTRUCTION.to_owned());

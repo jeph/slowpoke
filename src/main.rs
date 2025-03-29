@@ -10,10 +10,11 @@ use crate::utils::gemini_client::GeminiClient;
 use poise::serenity_prelude::{
   ActivityData, ActivityType, ClientBuilder, GatewayIntents,
 };
-use poise::{Framework, FrameworkOptions};
+use poise::{EditTracker, Framework, FrameworkOptions, PrefixFrameworkOptions};
 use shuttle_runtime::SecretStore;
 use shuttle_serenity::ShuttleSerenity;
 use std::env;
+use std::sync::Arc;
 use text_splitter::{Characters, MarkdownSplitter};
 use tracing::info;
 
@@ -43,6 +44,14 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
   let framework = Framework::builder()
     .options(FrameworkOptions {
       commands: vec![ping(), eight_ball(), prompt(), chat(), tfti()],
+      prefix_options: PrefixFrameworkOptions {
+        prefix: Some("!".into()),
+        edit_tracker: Some(Arc::new(EditTracker::for_timespan(
+          std::time::Duration::from_secs(3600),
+        ))),
+        case_insensitive_commands: true,
+        ..Default::default()
+      },
       ..Default::default()
     })
     .setup(|context, _ready, framework| {
@@ -65,7 +74,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     })
     .build();
 
-  let intents = GatewayIntents::non_privileged();
+  let intents = GatewayIntents::non_privileged() | GatewayIntents::MESSAGE_CONTENT;
 
   let client = ClientBuilder::new(token, intents)
     .framework(framework)

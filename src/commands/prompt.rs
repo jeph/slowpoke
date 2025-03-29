@@ -1,5 +1,5 @@
 use crate::utils::gemini_client::GeminiPrompt;
-use poise::serenity_prelude::{CreateEmbed, CreateEmbedFooter};
+use poise::serenity_prelude::{Color, CreateEmbed, CreateEmbedFooter};
 use poise::{command, CreateReply};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -7,7 +7,6 @@ type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
 #[command(
   slash_command,
-  prefix_command,
   description_localized("en-US", "Ask the LLM a question"),
   aliases("proompt")
 )]
@@ -46,7 +45,9 @@ pub async fn prompt(
         None
       };
 
-      let embed = CreateEmbed::default().description(response.to_owned());
+      let embed = CreateEmbed::default()
+        .color(Color::from_rgb(166, 227, 161))
+        .description(response.to_owned());
       let embed = match footer {
         Some(footer) => embed.footer(CreateEmbedFooter::new(footer)),
         None => embed,
