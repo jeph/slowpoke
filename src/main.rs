@@ -5,6 +5,7 @@ use crate::commands::chat::chat;
 use crate::commands::eight_ball::eight_ball;
 use crate::commands::ping::ping;
 use crate::commands::prompt::prompt;
+use crate::commands::tfti::tfti;
 use crate::utils::gemini_client::GeminiClient;
 use poise::serenity_prelude::{
   ActivityData, ActivityType, ClientBuilder, GatewayIntents,
@@ -41,7 +42,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
   info!("Setting up the bot");
   let framework = Framework::builder()
     .options(FrameworkOptions {
-      commands: vec![ping(), eight_ball(), prompt(), chat()],
+      commands: vec![ping(), eight_ball(), prompt(), chat(), tfti()],
       ..Default::default()
     })
     .setup(|context, _ready, framework| {
