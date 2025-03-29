@@ -1,6 +1,5 @@
 use poise::serenity_prelude::{CreateEmbed, GetMessages, Message};
 use poise::{command, CreateReply};
-use tracing::log::info;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
@@ -20,9 +19,7 @@ pub async fn tfti(ctx: Context<'_>) -> Result<(), Error> {
 
   let tfti_multiplier = messages
     .iter()
-    .enumerate()
-    .take_while(|message_with_index| {
-      let (index, message) = message_with_index;
+    .take_while(|message| {
       let is_bot_message = message.author.id == ctx.framework().bot_id;
       let is_tfti = message.embeds.iter().any(|embed| match &embed.title {
         Some(title) => title.starts_with("Tfti"),
@@ -39,7 +36,7 @@ pub async fn tfti(ctx: Context<'_>) -> Result<(), Error> {
       .description("Thanks for the invite, asshole."),
     1 => embed
       .title("Tfti x2")
-      .description("Thanks for the invite, asshole. Oh wait, it was already said that."),
+      .description("Thanks for the invite, asshole. Oh wait, that was just said."),
     2 => embed
       .title("Tfti x3")
       .description("Thanks for the invite, asshole. Feels like I'm on repeat here."),
