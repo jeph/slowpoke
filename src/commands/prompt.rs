@@ -7,7 +7,6 @@ type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
 #[command(
   slash_command,
-  prefix_command,
   description_localized("en-US", "Ask the LLM a question"),
   aliases("proompt")
 )]

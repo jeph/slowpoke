@@ -52,7 +52,6 @@ const EIGHT_BALL_RESPONSES: &[&str] = &[
 
 #[command(
   slash_command,
-  prefix_command,
   rename = "8ball",
   description_localized("en-US", "Ask the 8 ball a question")
 )]
