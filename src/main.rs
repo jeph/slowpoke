@@ -33,14 +33,17 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .expect("DISCORD_TOKEN was not found");
   info!("Successfully got discord token from secret store");
 
+  info!("Getting gemini api key from secret store");
   let gemini_api_key = secret_store
     .get("GEMINI_API_KEY")
     .expect("GEMINI_API_KEY was not found");
+  info!("Successfully got gemini api key from secret store");
+
   let gemini_client = GeminiClient::new(gemini_api_key, reqwest::Client::new());
 
   let markdown_splitter = MarkdownSplitter::new(4096);
 
-  info!("Setting up the bot");
+  info!("Initializing slowpoke...");
   let framework = Framework::builder()
     .options(FrameworkOptions {
       commands: vec![ping(), eight_ball(), prompt(), chat(), tfti()],
@@ -65,7 +68,10 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
           state: None,
           url: None,
         };
+
+        info!("Setting activity data to {:#?}", activity_data);
         context.set_activity(Some(activity_data));
+
         Ok(Data {
           gemini_client,
           markdown_splitter,
@@ -80,7 +86,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .framework(framework)
     .await
     .map_err(shuttle_runtime::CustomError::new)?;
-  info!("Successfully set up the bot");
+  info!("Initialized slowpoke!");
 
   Ok(client.into())
 }
