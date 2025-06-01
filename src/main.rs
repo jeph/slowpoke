@@ -3,10 +3,12 @@ mod utils;
 
 use crate::commands::chat::chat;
 use crate::commands::eight_ball::eight_ball;
+use crate::commands::imagine::imagine;
 use crate::commands::ping::ping;
 use crate::commands::prompt::prompt;
 use crate::commands::tfti::tfti;
 use crate::utils::gemini_client::GeminiClient;
+use crate::utils::gemini_imagen_client::GeminiImagenClient;
 use poise::serenity_prelude::{
   ActivityData, ActivityType, ClientBuilder, GatewayIntents,
 };
@@ -20,6 +22,7 @@ use tracing::info;
 
 struct Data {
   gemini_client: GeminiClient,
+  gemini_imagen_client: GeminiImagenClient,
   markdown_splitter: MarkdownSplitter<Characters>,
 }
 
@@ -39,14 +42,16 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .expect("GEMINI_API_KEY was not found");
   info!("Successfully got gemini api key from secret store");
 
-  let gemini_client = GeminiClient::new(gemini_api_key, reqwest::Client::new());
+  let gemini_client = GeminiClient::new(gemini_api_key.clone(), reqwest::Client::new());
+  let gemini_imagen_client =
+    GeminiImagenClient::new(gemini_api_key.clone(), reqwest::Client::new());
 
   let markdown_splitter = MarkdownSplitter::new(4096);
 
   info!("Initializing slowpoke...");
   let framework = Framework::builder()
     .options(FrameworkOptions {
-      commands: vec![ping(), eight_ball(), prompt(), chat(), tfti()],
+      commands: vec![ping(), eight_ball(), prompt(), chat(), tfti(), imagine()],
       prefix_options: PrefixFrameworkOptions {
         prefix: Some("!".into()),
         edit_tracker: Some(Arc::new(EditTracker::for_timespan(
@@ -74,6 +79,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
 
         Ok(Data {
           gemini_client,
+          gemini_imagen_client,
           markdown_splitter,
         })
       })
