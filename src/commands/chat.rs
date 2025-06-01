@@ -24,7 +24,11 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
       .global_name
       .as_deref()
       .unwrap_or(&message.author.name);
-    let time = message.timestamp.to_utc().format("%Y-%m-%dT%H:%MZ").to_string();
+    let time = message
+      .timestamp
+      .to_utc()
+      .format("%Y-%m-%dT%H:%MZ")
+      .to_string();
     format!(
       "{}[name: {}][time: {}][isBot: {}]: {}\n",
       acc, name, time, message.author.bot, message.content
