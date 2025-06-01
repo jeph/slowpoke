@@ -60,9 +60,9 @@ impl GeminiImagenClient {
       .await?
       .text()
       .await?;
+    info!("Got the following response: {:#?}", response);
 
     let response: PostImagenPromptResponse = from_str(&response).unwrap();
-    info!("Got the following response: {:#?}", response);
 
     let base_64_images = response.candidates[0]
       .content
