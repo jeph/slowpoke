@@ -54,7 +54,7 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .options(FrameworkOptions {
       commands: vec![ping(), eight_ball(), prompt(), chat(), tfti(), imagine()],
       prefix_options: PrefixFrameworkOptions {
-        prefix: Some("!".into()),
+        prefix: Some("!".to_owned()),
         edit_tracker: Some(Arc::new(EditTracker::for_timespan(
           std::time::Duration::from_secs(3600),
         ))),

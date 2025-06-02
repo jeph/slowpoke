@@ -28,7 +28,7 @@ pub async fn imagine(
   let response = gemini_imagen_client
     .prompt(imagen_prompt)
     .await?
-    .base_64_image;
+    .base64_image;
   let image_bytes = STANDARD.decode(response).unwrap();
 
   let attachment = CreateAttachment::bytes(image_bytes, "image.png");

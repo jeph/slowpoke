@@ -1,3 +1,4 @@
+use std::error::Error;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -32,7 +33,7 @@ impl GeminiClient {
   pub async fn prompt(
     &self,
     prompt: GeminiPrompt,
-  ) -> Result<GeminiResponse, reqwest::Error> {
+  ) -> Result<GeminiResponse, Box<dyn Error + Send + Sync>> {
     info!(?prompt);
     let url = format!(
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={}",

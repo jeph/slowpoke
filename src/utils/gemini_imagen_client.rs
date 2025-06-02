@@ -1,3 +1,4 @@
+use std::error::Error;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -17,7 +18,7 @@ pub struct GeminiImagenPrompt {
 
 #[derive(Debug, Clone)]
 pub struct GeminiImagenResponse {
-  pub base_64_image: String,
+  pub base64_image: String,
 }
 
 impl GeminiImagenClient {
@@ -31,7 +32,7 @@ impl GeminiImagenClient {
   pub async fn prompt(
     &self,
     prompt: GeminiImagenPrompt,
-  ) -> Result<GeminiImagenResponse, reqwest::Error> {
+  ) -> Result<GeminiImagenResponse, Box<dyn Error + Send + Sync>> {
     info!("Prompting for image with prompt: {:#?}", prompt);
     let url = format!(
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key={}",
@@ -64,23 +65,22 @@ impl GeminiImagenClient {
 
     let response: PostImagenPromptResponse = from_str(&response).unwrap();
 
-    let base_64_images = response.candidates[0]
+    let base64_images = response.candidates[0]
       .content
       .parts
       .iter()
       .filter(|part| part.inline_data.is_some())
-      .cloned()
-      .collect::<Vec<ImagenPart>>();
+      .collect::<Vec<&ImagenPart>>();
 
-    let base_64_image = base_64_images
+    let base64_image = &base64_images
       .get(0)
       .unwrap()
-      .clone()
       .inline_data
+      .as_ref()
       .unwrap()
       .data;
 
-    Ok(GeminiImagenResponse { base_64_image })
+    Ok(GeminiImagenResponse { base64_image: base64_image.to_owned() })
   }
 }
 
