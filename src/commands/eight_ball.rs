@@ -35,7 +35,6 @@ const EIGHT_BALL_RESPONSES: &[&str] = &[
   "Very doubtful",
   "Not a chance",
   "Outlook is grim",
-  "Don't count on it",
   "Absolutely not",
   "The stars say no",
   "The answer is no",
