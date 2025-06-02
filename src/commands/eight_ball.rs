@@ -47,6 +47,7 @@ const EIGHT_BALL_RESPONSES: &[&str] = &[
   "The signs aren’t good",
   "It’s a red light",
   "No, and don’t ask again",
+  "Signs point to no",
 ];
 
 const COLORS: [(u8, u8, u8); 12] = [
