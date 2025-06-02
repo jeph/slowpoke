@@ -42,9 +42,10 @@ async fn main(#[shuttle_runtime::Secrets] secret_store: SecretStore) -> ShuttleS
     .expect("GEMINI_API_KEY was not found");
   info!("Successfully got gemini api key from secret store");
 
-  let gemini_client = GeminiClient::new(gemini_api_key.clone(), reqwest::Client::new());
+  let reqwest_client = reqwest::Client::new();
+  let gemini_client = GeminiClient::new(gemini_api_key.clone(), reqwest_client.clone());
   let gemini_imagen_client =
-    GeminiImagenClient::new(gemini_api_key.clone(), reqwest::Client::new());
+    GeminiImagenClient::new(gemini_api_key.clone(), reqwest_client);
 
   let markdown_splitter = MarkdownSplitter::new(4096);
 
