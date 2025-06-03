@@ -1,0 +1,7 @@
+.git
+.gitignore
+target/
+.github
+.env
+.env.example
+rustfmt.toml

@@ -1,9 +1,8 @@
 use crate::utils::gemini_imagen_client::GeminiImagenPrompt;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
-use poise::serenity_prelude::{Color, CreateEmbed};
+use poise::serenity_prelude::{Color, CreateAttachment, CreateEmbed};
 use poise::{command, CreateReply};
-use shuttle_serenity::serenity::all::CreateAttachment;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;

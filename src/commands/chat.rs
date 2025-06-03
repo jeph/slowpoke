@@ -1,7 +1,6 @@
 use crate::utils::gemini_client::GeminiPrompt;
 use poise::command;
-use poise::serenity_prelude::GetMessages;
-use shuttle_serenity::serenity::all::Message;
+use poise::serenity_prelude::{GetMessages, Message};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
@@ -44,8 +43,7 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
       system_instruction,
       prompt: messages,
     })
-    .await
-    .unwrap()
+    .await?
     .response;
 
   ctx.say(response).await?;
