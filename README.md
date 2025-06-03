@@ -13,5 +13,5 @@ Refer to the `.env.example` file and create a version called `.env` with the req
 Run a local version of the bot:
 
 ```zsh
-cargo shuttle run
+cargo run
 ```
