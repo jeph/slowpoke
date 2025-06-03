@@ -6,7 +6,7 @@ slowpoke is a custom bot for Discord I'm writing to force me to learn Rust. It i
 
 ## Setup
 
-Refer to the `Secrets.dev.toml.example` file and create a version called `Secrets.dev.toml` with the required variables.
+Refer to the `.env.example` file and create a version called `.env` with the required variables.
 
 ## Development
 
