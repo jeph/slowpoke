@@ -1,4 +1,4 @@
-# Exajple Docker Compose file for running slowpoke
+# Example Docker Compose file for running slowpoke
 version: '3.8'
 services:
   slowpoke:
