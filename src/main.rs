@@ -6,6 +6,7 @@ use crate::commands::eight_ball::eight_ball;
 use crate::commands::imagine::imagine;
 use crate::commands::ping::ping;
 use crate::commands::prompt::prompt;
+use crate::commands::remix::remix;
 use crate::commands::tfti::tfti;
 use crate::utils::gemini_client::GeminiClient;
 use crate::utils::gemini_imagen_client::GeminiImagenClient;
@@ -50,7 +51,15 @@ async fn main() {
   info!("Initializing slowpoke...");
   let framework = Framework::builder()
     .options(FrameworkOptions {
-      commands: vec![ping(), eight_ball(), prompt(), chat(), tfti(), imagine()],
+      commands: vec![
+        ping(),
+        eight_ball(),
+        prompt(),
+        chat(),
+        tfti(),
+        imagine(),
+        remix(),
+      ],
       prefix_options: PrefixFrameworkOptions {
         prefix: Some("!".to_owned()),
         edit_tracker: Some(Arc::new(EditTracker::for_timespan(

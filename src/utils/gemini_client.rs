@@ -1,8 +1,8 @@
-use std::error::Error;
 use reqwest::header::CONTENT_TYPE;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::from_str;
+use std::error::Error;
 use tracing::info;
 
 #[derive(Debug)]
