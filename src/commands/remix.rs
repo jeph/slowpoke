@@ -2,29 +2,12 @@ use crate::utils::gemini_imagen_client::GeminiImagenPromptWithImage;
 use crate::Data;
 use poise::serenity_prelude::{Color, CreateAttachment, CreateEmbed, Message};
 use poise::{command, CreateReply};
-use rand::prelude::SliceRandom;
-use rand::thread_rng;
 use tracing::info;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type PrefixContext<'a> = poise::PrefixContext<'a, Data, Error>;
 
 const ERROR_EMBED_COLOR: Color = Color::RED;
-
-const COLORS: [(u8, u8, u8); 12] = [
-  (245, 194, 231),
-  (203, 166, 247),
-  (243, 139, 168),
-  (235, 160, 172),
-  (250, 179, 135),
-  (249, 226, 175),
-  (166, 227, 161),
-  (148, 226, 213),
-  (137, 220, 235),
-  (116, 199, 236),
-  (137, 180, 250),
-  (180, 190, 254),
-];
 
 #[command(prefix_command)]
 pub async fn remix(
@@ -117,18 +100,9 @@ pub async fn remix(
   };
 
   let attachment = CreateAttachment::bytes(image_data, "image.png");
-
-  let color = COLORS.choose(&mut thread_rng()).unwrap();
-  let embed = CreateEmbed::default()
-    .title("Remix!")
-    .description(prompt)
-    .color(Color::from_rgb(color.0, color.1, color.2))
-    .attachment(&attachment.filename);
-
   ctx
     .send(
       CreateReply::default()
-        .embed(embed)
         .attachment(attachment)
         .reply(true),
     )
