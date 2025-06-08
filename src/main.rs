@@ -12,13 +12,14 @@ use crate::utils::gemini_client::GeminiClient;
 use crate::utils::gemini_imagen_client::GeminiImagenClient;
 use dotenvy::dotenv;
 use poise::serenity_prelude::{
-  ActivityData, ActivityType, ClientBuilder, GatewayIntents,
+  ClientBuilder, GatewayIntents,
 };
 use poise::{EditTracker, Framework, FrameworkOptions, PrefixFrameworkOptions};
 use std::env;
 use std::sync::Arc;
 use text_splitter::{Characters, MarkdownSplitter};
 use tracing::info;
+use crate::utils::activity_manager::start_activity_rotation;
 
 struct Data {
   gemini_client: GeminiClient,
@@ -75,16 +76,8 @@ async fn main() {
         poise::builtins::register_globally(context, &framework.options().commands)
           .await?;
 
-        let activity_data = ActivityData {
-          name: "Pokémon".to_owned(),
-          kind: ActivityType::Playing,
-          state: None,
-          url: None,
-        };
-
-        info!("Setting activity data to {:#?}", activity_data);
-        context.set_activity(Some(activity_data));
-
+        start_activity_rotation(&context.shard);
+        
         Ok(Data {
           gemini_client,
           gemini_imagen_client,
