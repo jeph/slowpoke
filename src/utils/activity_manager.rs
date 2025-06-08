@@ -15,6 +15,7 @@ fn get_activities() -> &'static Vec<ActivityData> {
       ActivityData::playing("Battletoads"),
       ActivityData::playing("Counter-Strike 2"),
       ActivityData::playing("Hello Kitty Island Adventure"),
+      ActivityData::playing("Badminton"),
       ActivityData::watching("JasonTheWeen"),
       ActivityData::watching("xQc"),
       ActivityData::watching("Pokimane"),
@@ -23,6 +24,9 @@ fn get_activities() -> &'static Vec<ActivityData> {
       ActivityData::listening("Illenium"),
       ActivityData::listening("The Chainsmokers"),
       ActivityData::listening("KSI"),
+      ActivityData::custom("Going to Plan B"),
+      ActivityData::custom("Clubbing at Mission"),
+      ActivityData::custom("Waiting in line at Den Social"),
     ]
   })
 }
