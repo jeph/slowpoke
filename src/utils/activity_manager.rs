@@ -34,7 +34,7 @@ pub fn start_activity_rotation(shard_messenger: &ShardMessenger) {
     let initial_activity = get_activities().choose(&mut rand::thread_rng()).unwrap();
     shard_messenger.set_activity(Some(initial_activity.clone()));
 
-    let mut interval = interval(Duration::from_secs(60 * 30));
+    let mut interval = interval(Duration::from_secs(60 * 60));
     loop {
       interval.tick().await;
 
