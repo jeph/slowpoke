@@ -23,26 +23,30 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
     .cloned()
     .collect::<Vec<Message>>();
 
-  let guild_id = ctx.guild_id().unwrap();
-  let author_ids = messages
-    .iter()
-    .map(|message| message.author.id)
-    .collect::<HashSet<UserId>>();
-
-  let display_names: HashMap<UserId, String> = stream::iter(author_ids)
-    .map(|author_id| async move {
-      let member_result = guild_id.member(ctx, author_id).await;
-      (author_id, member_result)
-    })
-    .buffer_unordered(100)
-    .filter_map(|(author_id, member_result)| async move {
-      match member_result {
-        Ok(member) => Some((author_id, member.display_name().to_string())),
-        Err(_) => None,
-      }
-    })
-    .collect()
-    .await;
+  let guild_id = ctx.guild_id();
+  let display_names: HashMap<UserId, String> = match guild_id {
+    Some(guild_id) => {
+      let author_ids = messages
+        .iter()
+        .map(|message| message.author.id)
+        .collect::<HashSet<UserId>>();
+      stream::iter(author_ids)
+        .map(|author_id| async move {
+          let member_result = guild_id.member(ctx, author_id).await;
+          (author_id, member_result)
+        })
+        .buffer_unordered(100)
+        .filter_map(|(author_id, member_result)| async move {
+          match member_result {
+            Ok(member) => Some((author_id, member.display_name().to_string())),
+            Err(_) => None,
+          }
+        })
+        .collect()
+        .await
+    }
+    None => HashMap::new(),
+  };
 
   let messages = messages.iter().fold("".to_owned(), |acc, message| {
     let name = match display_names.get(&message.author.id) {
