@@ -1,12 +1,17 @@
+use std::collections::{HashMap, HashSet};
+use futures::{stream, StreamExt};
 use crate::utils::gemini_client::GeminiPrompt;
 use poise::command;
-use poise::serenity_prelude::{GetMessages, Message};
+use poise::serenity_prelude::*;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, crate::Data, crate::Error>;
 
 #[command(slash_command, description_localized("en-US", "Chat with slowpoke"))]
 pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
+  // As LLMs take some time to respond, defer must be called first to keep the interaction alive.
+  ctx.defer().await?;
+  
   let gemini_client = &ctx.data().gemini_client;
   let system_instruction = Some(CHAT_SYSTEM_INSTRUCTION.to_owned());
   let messages = ctx
@@ -17,12 +22,33 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
     .rev()
     .cloned()
     .collect::<Vec<Message>>();
+  
+  let guild_id = ctx.guild_id().unwrap();
+  let author_ids = messages.iter().map(|message| message.author.id).collect::<HashSet<UserId>>();
+  
+  let display_names: HashMap<UserId, String> = stream::iter(author_ids).map(|author_id| async move {
+    let member_result = guild_id.member(ctx, author_id).await;
+    (author_id, member_result)
+  })
+      .buffer_unordered(10)
+      .filter_map(|(author_id, member_result)| async move {
+    match member_result {
+      Ok(member) => Some((author_id, member.display_name().to_string())),
+      Err(_) => None,
+    }
+  })
+      .collect()
+      .await;
+  
   let messages = messages.iter().fold("".to_owned(), |acc, message| {
-    let name = message
-      .author
-      .global_name
-      .as_deref()
-      .unwrap_or(&message.author.name);
+    let name = match display_names.get(&message.author.id) { 
+        Some(name) => name,
+        None => message
+              .author
+              .global_name
+              .as_deref()
+              .unwrap_or(&message.author.name)
+    };
     let time = message
       .timestamp
       .to_utc()
@@ -33,10 +59,6 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
       acc, name, time, message.author.bot, message.content
     )
   });
-
-  // As LLMs take some time to respond, defer must be called first in order to keep
-  // the interaction alive.
-  ctx.defer().await?;
 
   let response = gemini_client
     .prompt(GeminiPrompt {
