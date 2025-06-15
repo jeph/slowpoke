@@ -101,11 +101,7 @@ pub async fn remix(
 
   let attachment = CreateAttachment::bytes(image_data, "image.png");
   ctx
-    .send(
-      CreateReply::default()
-        .attachment(attachment)
-        .reply(true),
-    )
+    .send(CreateReply::default().attachment(attachment).reply(true))
     .await?;
 
   Ok(())
