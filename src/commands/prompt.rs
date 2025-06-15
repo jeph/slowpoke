@@ -1,4 +1,6 @@
 use crate::utils::gemini_client::GeminiPrompt;
+use futures::StreamExt;
+use futures::{stream, TryStreamExt};
 use poise::serenity_prelude::{Color, CreateEmbed, CreateEmbedFooter};
 use poise::{command, CreateReply};
 
@@ -14,21 +16,19 @@ pub async fn prompt(
   ctx: Context<'_>,
   #[description = "Prompt for the LLM"] prompt: String,
 ) -> Result<(), Error> {
+  // As LLMs take some time to respond, defer must be called first to keep the interaction alive.
+  ctx.defer().await?;
+
   let gemini_client = &ctx.data().gemini_client;
   let markdown_splitter = &ctx.data().markdown_splitter;
   let system_instruction = Some(PROMPT_SYSTEM_INSTRUCTION.to_owned());
-
-  // As LLMs take some time to respond, defer must be called first in order to keep
-  // the interaction alive.
-  ctx.defer().await?;
 
   let response = gemini_client
     .prompt(GeminiPrompt {
       system_instruction,
       prompt: prompt.clone(),
     })
-    .await
-    .unwrap()
+    .await?
     .response;
 
   let prompt_header = format!("***{}***\n\n", prompt);
@@ -57,9 +57,13 @@ pub async fn prompt(
     })
     .collect::<Vec<CreateReply>>();
 
-  for response in responses {
-    ctx.send(response).await?;
-  }
+  stream::iter(responses)
+    .map(|reply| Ok::<_, Error>(reply))
+    .try_for_each(|response| async move {
+      ctx.send(response).await?;
+      Ok(())
+    })
+    .await?;
 
   Ok(())
 }
