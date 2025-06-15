@@ -30,7 +30,7 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
     let member_result = guild_id.member(ctx, author_id).await;
     (author_id, member_result)
   })
-      .buffer_unordered(10)
+      .buffer_unordered(100)
       .filter_map(|(author_id, member_result)| async move {
     match member_result {
       Ok(member) => Some((author_id, member.display_name().to_string())),
