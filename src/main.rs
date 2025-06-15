@@ -8,18 +8,16 @@ use crate::commands::ping::ping;
 use crate::commands::prompt::prompt;
 use crate::commands::remix::remix;
 use crate::commands::tfti::tfti;
+use crate::utils::activity_manager::start_activity_rotation;
 use crate::utils::gemini_client::GeminiClient;
 use crate::utils::gemini_imagen_client::GeminiImagenClient;
 use dotenvy::dotenv;
-use poise::serenity_prelude::{
-  ClientBuilder, GatewayIntents,
-};
+use poise::serenity_prelude::{ClientBuilder, GatewayIntents};
 use poise::{EditTracker, Framework, FrameworkOptions, PrefixFrameworkOptions};
 use std::env;
 use std::sync::Arc;
 use text_splitter::{Characters, MarkdownSplitter};
 use tracing::info;
-use crate::utils::activity_manager::start_activity_rotation;
 
 struct Data {
   gemini_client: GeminiClient,
@@ -77,7 +75,7 @@ async fn main() {
           .await?;
 
         start_activity_rotation(&context.shard);
-        
+
         Ok(Data {
           gemini_client,
           gemini_imagen_client,
