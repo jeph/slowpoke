@@ -1,6 +1,7 @@
 use crate::utils::gemini_client::GeminiPrompt;
 use futures::{stream, StreamExt};
 use poise::command;
+use poise::serenity_prelude::Error::Http;
 use poise::serenity_prelude::*;
 use std::collections::{HashMap, HashSet};
 
@@ -17,11 +18,19 @@ pub async fn chat(ctx: Context<'_>) -> Result<(), Error> {
   let messages = ctx
     .channel_id()
     .messages(ctx.http(), GetMessages::new().limit(100))
-    .await?
-    .iter()
-    .rev()
-    .cloned()
-    .collect::<Vec<Message>>();
+    .await;
+
+  let messages = match messages {
+    Ok(messages) => messages.iter().rev().cloned().collect::<Vec<Message>>(),
+    Err(Http(_)) => {
+      ctx
+        .say("Ah! I'm not able to see the messages in this chat. You might need to add me to \
+        the chat or channel before I can chat with you.")
+        .await?;
+      return Ok(());
+    }
+    Err(e) => return Err(e.into()),
+  };
 
   let guild_id = ctx.guild_id();
   let display_names: HashMap<UserId, String> = match guild_id {

@@ -1,6 +1,6 @@
 use crate::utils::gemini_client::GeminiPrompt;
-use futures::{stream, TryStreamExt};
 use futures::StreamExt;
+use futures::{stream, TryStreamExt};
 use poise::serenity_prelude::{Color, CreateEmbed, CreateEmbedFooter};
 use poise::{command, CreateReply};
 
