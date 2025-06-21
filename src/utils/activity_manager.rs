@@ -1,6 +1,6 @@
-use poise::serenity_prelude::{ActivityData, ShardMessenger};
+use poise::serenity_prelude::{ActivityData, ShardManager};
 use rand::prelude::SliceRandom;
-use std::sync::OnceLock;
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 use tokio::time::interval;
 use tracing::info;
@@ -31,13 +31,8 @@ fn get_activities() -> &'static Vec<ActivityData> {
   })
 }
 
-pub fn start_activity_rotation(shard_messenger: &ShardMessenger) {
-  let shard_messenger = shard_messenger.clone();
+pub fn start_activity_rotation(shard_manager: Arc<ShardManager>) {
   tokio::spawn(async move {
-    info!("Setting initial activity...");
-    let initial_activity = get_activities().choose(&mut rand::thread_rng()).unwrap();
-    shard_messenger.set_activity(Some(initial_activity.clone()));
-
     let mut interval = interval(Duration::from_secs(60 * 60));
     loop {
       interval.tick().await;
@@ -47,8 +42,12 @@ pub fn start_activity_rotation(shard_messenger: &ShardMessenger) {
         .unwrap()
         .clone();
 
-      info!("Setting activity data to {:#?}", activity_data);
-      shard_messenger.set_activity(Some(activity_data));
+      info!("Setting activity data to\n{:#?}", activity_data);
+      let runners = shard_manager.runners.lock().await;
+      runners.iter().for_each(|(_, runner)| {
+        info!("Setting activity data for runner:\n{:#?}", runner);
+        runner.runner_tx.set_activity(Some(activity_data.clone()));
+      });
     }
   });
 }
