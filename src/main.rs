@@ -74,7 +74,7 @@ async fn main() {
         poise::builtins::register_globally(context, &framework.options().commands)
           .await?;
 
-        start_activity_rotation(&context.shard);
+        start_activity_rotation(framework.shard_manager().clone());
 
         Ok(Data {
           gemini_client,
