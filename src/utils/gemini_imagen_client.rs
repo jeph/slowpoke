@@ -60,7 +60,7 @@ impl GeminiImagenClient {
       },
     };
 
-    let request_json = serde_json::to_string(&imagen_request).unwrap();
+    let request_json = serde_json::to_string(&imagen_request)?;
 
     let response = self
       .client
@@ -73,7 +73,7 @@ impl GeminiImagenClient {
       .await?;
     info!("Got the following response: {:#?}", response);
 
-    let response: PostImagenPromptResponse = from_str(&response).unwrap();
+    let response: PostImagenPromptResponse = from_str(&response)?;
 
     let base64_images = response.candidates[0]
       .content
@@ -84,13 +84,17 @@ impl GeminiImagenClient {
 
     let base64_image = &base64_images
       .get(0)
-      .unwrap()
+      .ok_or(Box::<dyn Error + Send + Sync>::from(
+        "No image was returned from the API",
+      ))?
       .inline_data
       .as_ref()
-      .unwrap()
+      .ok_or(Box::<dyn Error + Send + Sync>::from(
+        "Returned image contained no inline data",
+      ))?
       .data;
 
-    let decoded_image_data = STANDARD.decode(base64_image).unwrap();
+    let decoded_image_data = STANDARD.decode(base64_image)?;
 
     Ok(GeminiImagenResponse {
       image_data: decoded_image_data,
@@ -132,7 +136,7 @@ impl GeminiImagenClient {
       },
     };
 
-    let request_json = serde_json::to_string(&imagen_request).unwrap();
+    let request_json = serde_json::to_string(&imagen_request)?;
 
     let response = self
       .client
@@ -145,7 +149,7 @@ impl GeminiImagenClient {
       .await?;
     info!("Got the following response: {:#?}", response);
 
-    let response: PostImagenPromptResponse = from_str(&response).unwrap();
+    let response: PostImagenPromptResponse = from_str(&response)?;
 
     let base64_images = response.candidates[0]
       .content
@@ -156,10 +160,14 @@ impl GeminiImagenClient {
 
     let base64_image = &base64_images
       .get(0)
-      .unwrap()
+      .ok_or(Box::<dyn Error + Send + Sync>::from(
+        "No image was returned from the API",
+      ))?
       .inline_data
       .as_ref()
-      .unwrap()
+      .ok_or(Box::<dyn Error + Send + Sync>::from(
+        "Returned image contained no inline data",
+      ))?
       .data;
 
     let decoded_image_data = STANDARD.decode(base64_image).unwrap();
