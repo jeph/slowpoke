@@ -37,7 +37,10 @@ pub fn start_activity_rotation(shard_manager: Arc<ShardManager>) {
     loop {
       interval.tick().await;
 
-      let activity_data = get_activities().choose(&mut rand::rng()).unwrap().clone();
+      let activity_data = match get_activities().choose(&mut rand::rng()) {
+        Some(activity) => activity,
+        None => continue,
+      };
 
       info!("Setting activity data to\n{:#?}", activity_data);
       let runners = shard_manager.runners.lock().await;
