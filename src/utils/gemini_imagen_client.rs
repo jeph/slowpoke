@@ -170,7 +170,7 @@ impl GeminiImagenClient {
       ))?
       .data;
 
-    let decoded_image_data = STANDARD.decode(base64_image).unwrap();
+    let decoded_image_data = STANDARD.decode(base64_image)?;
 
     Ok(GeminiImagenResponse {
       image_data: decoded_image_data,
