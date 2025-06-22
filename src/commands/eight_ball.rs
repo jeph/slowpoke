@@ -1,7 +1,6 @@
 use poise::serenity_prelude::{Color, CreateEmbed};
 use poise::{command, CreateReply};
-use rand::prelude::SliceRandom;
-use rand::thread_rng;
+use rand::prelude::IndexedRandom;
 use tracing::info;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
@@ -76,10 +75,12 @@ pub async fn eight_ball(
 ) -> Result<(), Error> {
   info!("Start processing 8 ball command");
   let eight_ball_response = EIGHT_BALL_RESPONSES
-    .choose(&mut thread_rng())
-    .unwrap()
+    .choose(&mut rand::rng())
+    .ok_or(Error::from("Unable to select a 8 ball response"))?
     .to_string();
-  let color = COLORS.choose(&mut thread_rng()).unwrap();
+  let color = COLORS
+    .choose(&mut rand::rng())
+    .ok_or(Error::from("Unable to select a color"))?;
 
   let embed = CreateEmbed::default()
     .color(Color::from_rgb(color.0, color.1, color.2))

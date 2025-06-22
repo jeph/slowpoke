@@ -90,9 +90,9 @@ async fn main() {
   ClientBuilder::new(token, intents)
     .framework(framework)
     .await
-    .unwrap()
+    .expect("Unable to set command framework")
     .start()
     .await
-    .unwrap();
+    .expect("Unable to start serenity client");
   info!("Initialized slowpoke!");
 }
