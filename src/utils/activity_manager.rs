@@ -3,7 +3,7 @@ use rand::prelude::IndexedRandom;
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 use tokio::time::interval;
-use tracing::info;
+use tracing::{info, warn};
 
 static ACTIVITIES: OnceLock<Vec<ActivityData>> = OnceLock::new();
 
@@ -39,7 +39,10 @@ pub fn start_activity_rotation(shard_manager: Arc<ShardManager>) {
 
       let activity_data = match get_activities().choose(&mut rand::rng()) {
         Some(activity) => activity,
-        None => continue,
+        None => {
+          warn!("Could not select an activity\nSkipping activity rotation");
+          continue;
+        }
       };
 
       info!("Setting activity data to\n{:#?}", activity_data);
