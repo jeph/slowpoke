@@ -58,7 +58,7 @@ impl GeminiClient {
       }],
     };
 
-    let request_json = serde_json::to_string(&post_prompt_request).unwrap();
+    let request_json = serde_json::to_string(&post_prompt_request)?;
 
     let response = self
       .client
@@ -69,7 +69,7 @@ impl GeminiClient {
       .await?;
     let response = &response.text().await?;
     info!(response);
-    let response: PostPromptResponse = from_str(response).unwrap();
+    let response: PostPromptResponse = from_str(response)?;
 
     let response = response
       .candidates
