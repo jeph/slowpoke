@@ -36,7 +36,7 @@ impl GeminiClient {
   ) -> Result<GeminiResponse, Box<dyn Error + Send + Sync>> {
     info!(?prompt);
     let url = format!(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key={}",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={}",
             self.gemini_api_key
         );
 
