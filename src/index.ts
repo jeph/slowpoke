@@ -72,7 +72,7 @@ client.commands.set(tftiCommand.data.name, tftiCommand)
 client.commands.set(imagineCommand.data.name, imagineCommand)
 
 // Bot ready event
-client.once('ready', () => {
+client.once('clientReady', () => {
   logger.info('Ready!')
   startActivityRotation(client)
   logger.info('Initialized slowpoke!')
