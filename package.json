@@ -1,0 +1,37 @@
+{
+  "name": "slowpoke-typescript",
+  "version": "0.1.0",
+  "description": "A Discord bot written in TypeScript - converted from Rust",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "typescript"
+  ],
+  "author": "Jeph",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "discord.js": "^14.21.0",
+    "dotenv": "^17.2.1",
+    "pino": "^9.9.0",
+    "pino-pretty": "^13.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "neostandard": "^0.12.2",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.4",
+    "typescript": "^5.9.2"
+  }
+}
