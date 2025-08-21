@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
+import { SlashCommand } from '../models/commands'
 
 const PROMPT_SYSTEM_INSTRUCTION = `Return your response in markdown. Give as complete of an
 answer as possible. Assume whoever you're talking to will not be able to respond back so do not ask
@@ -48,52 +49,55 @@ function splitText (text: string, maxLength: number = 4096): string[] {
   return chunks
 }
 
-export const promptCommand = {
-  data: new SlashCommandBuilder()
-    .setName('prompt')
-    .setDescription('Ask the LLM a question')
-    .addStringOption(option =>
-      option
-        .setName('prompt')
-        .setDescription('Prompt for the LLM')
-        .setRequired(true)
-    ),
+export const createPromptCommand = (geminiClient: GeminiClient): SlashCommand => {
+  return {
+    command: new SlashCommandBuilder()
+      .setName('prompt')
+      .setDescription('Ask the LLM a question')
+      .addStringOption(option =>
+        option
+          .setName('prompt')
+          .setDescription('Prompt for the LLM')
+          .setRequired(true)
+      ),
 
-  async execute (interaction: ChatInputCommandInteraction, geminiClient: GeminiClient) {
-    // Defer the reply as LLMs take time to respond
-    await interaction.deferReply()
+    async execute (interaction: ChatInputCommandInteraction) {
+      // Defer the reply as LLMs take time to respond
+      await interaction.deferReply()
 
-    const promptText = interaction.options.get('prompt')?.value as string
+      const promptText = interaction.options.get('prompt')?.value as string
 
-    try {
-      const response = await geminiClient.prompt({
-        prompt: promptText,
-        systemInstruction: PROMPT_SYSTEM_INSTRUCTION
-      })
+      try {
+        const response = await geminiClient.prompt({
+          prompt: promptText,
+          systemInstruction: PROMPT_SYSTEM_INSTRUCTION
+        })
 
-      const promptHeader = `***${promptText}***\n\n`
-      const fullResponse = promptHeader + response
+        const promptHeader = `***${promptText}***\n\n`
+        const fullResponse = promptHeader + response
 
-      const chunks = splitText(fullResponse)
+        const chunks = splitText(fullResponse)
 
-      for (let i = 0; i < chunks.length; i++) {
-        const embed = new EmbedBuilder()
-          .setColor(0xA6E3A1) // RGB(166, 227, 161)
-          .setDescription(chunks[i])
+        for (let i = 0; i < chunks.length; i++) {
+          const embed = new EmbedBuilder()
+            .setColor(0xA6E3A1) // RGB(166, 227, 161)
+            .setDescription(chunks[i])
 
-        if (chunks.length > 1) {
-          embed.setFooter({ text: `${i + 1} / ${chunks.length}` })
+          if (chunks.length > 1) {
+            embed.setFooter({ text: `${i + 1} / ${chunks.length}` })
+          }
+
+          if (i === 0) {
+            await interaction.editReply({ embeds: [embed] })
+          } else {
+            await interaction.followUp({ embeds: [embed] })
+          }
         }
-
-        if (i === 0) {
-          await interaction.editReply({ embeds: [embed] })
-        } else {
-          await interaction.followUp({ embeds: [embed] })
-        }
+      } catch (error) {
+        logger.error({ error }, 'Error in prompt command')
+        await interaction.editReply('Sorry, there was an error processing your request.')
       }
-    } catch (error) {
-      logger.error({ error }, 'Error in prompt command')
-      await interaction.editReply('Sorry, there was an error processing your request.')
     }
+
   }
 }

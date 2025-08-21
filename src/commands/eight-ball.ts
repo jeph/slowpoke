@@ -1,5 +1,6 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { logger } from '../utils/logger'
+import { SlashCommand } from '../models/commands'
 
 const EIGHT_BALL_RESPONSES = [
   'It is certain',
@@ -64,8 +65,8 @@ function getRandomChoice<T> (array: T[]): T {
   return array[randomIndex]
 }
 
-export const eightBallCommand = {
-  data: new SlashCommandBuilder()
+export const createEightBallCommand = (): SlashCommand => ({
+  command: new SlashCommandBuilder()
     .setName('8ball')
     .setDescription('Ask the 8 ball a question')
     .addStringOption(option =>
@@ -105,4 +106,4 @@ export const eightBallCommand = {
     await interaction.reply({ embeds: [embed] })
     logger.debug('Finished processing 8 ball command')
   }
-}
+})

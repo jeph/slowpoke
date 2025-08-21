@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError } from 'discord.js'
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
+import { SlashCommand } from '../models/commands'
 
 const CHAT_SYSTEM_INSTRUCTION = `You are a Discord bot named slowpoke. You are named after
 the Pokémon Slowpoke. Respond to the Discord messages in the channel. You will be able to see up to
@@ -68,12 +69,12 @@ literally), here are some general guidelines on how to respond:
 
 `
 
-export const chatCommand = {
-  data: new SlashCommandBuilder()
+export const createChatCommand = (geminiClient: GeminiClient): SlashCommand => ({
+  command: new SlashCommandBuilder()
     .setName('chat')
     .setDescription('Chat with slowpoke'),
 
-  async execute (interaction: ChatInputCommandInteraction, geminiClient: GeminiClient) {
+  async execute (interaction: ChatInputCommandInteraction) {
     // Defer the reply as LLMs take time to respond
     await interaction.deferReply()
 
@@ -126,4 +127,4 @@ export const chatCommand = {
       await interaction.editReply('Sorry, there was an error processing the chat request.')
     }
   }
-}
+})

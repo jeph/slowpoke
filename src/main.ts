@@ -1,19 +1,20 @@
-import { Client, GatewayIntentBits, Collection } from 'discord.js'
+import { Client, Events, GatewayIntentBits } from 'discord.js'
 import dotenv from 'dotenv'
 import { GoogleGenAI } from '@google/genai'
-import { createGeminiClient, GeminiClient } from './utils/gemini-client'
+import { createGeminiClient } from './utils/gemini-client'
 import { GeminiImagenClient } from './utils/gemini-imagen-client'
 import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
 import {
-  pingCommand,
-  eightBallCommand,
-  promptCommand,
-  chatCommand,
-  tftiCommand,
-  imagineCommand,
-  remixCommand
+  createChatCommand,
+  createEightBallCommand,
+  createImagineCommand,
+  createPingCommand,
+  createPromptCommand,
+  createRemixCommand,
+  createTftiCommand
 } from './commands'
+import { PrefixCommand, SlashCommand } from './models/commands'
 
 // Load environment variables
 dotenv.config()
@@ -32,13 +33,34 @@ if (!geminiApiKey) {
 }
 logger.info('Successfully got gemini api key from environment')
 
-declare module 'discord.js' {
-  interface Client {
-    commands: Collection<string, any>;
-    geminiClient: GeminiClient;
-    geminiImagenClient: GeminiImagenClient;
-  }
-}
+const googleGenAI = new GoogleGenAI({ apiKey: geminiApiKey })
+const geminiClient = createGeminiClient({
+  googleGenAI,
+  textGenerationModel: 'gemini-2.5-flash'
+})
+const geminiImagenClient = new GeminiImagenClient(geminiApiKey)
+
+const pingCommand = createPingCommand()
+const eightBallCommand = createEightBallCommand()
+const promptCommand = createPromptCommand(geminiClient)
+const chatCommand = createChatCommand(geminiClient)
+const tftiCommand = createTftiCommand()
+const imagineCommand = createImagineCommand(geminiImagenClient)
+
+const slashCommands = new Map<string, SlashCommand>([
+  [pingCommand.command.name, pingCommand],
+  [eightBallCommand.command.name, eightBallCommand],
+  [promptCommand.command.name, promptCommand],
+  [chatCommand.command.name, chatCommand],
+  [tftiCommand.command.name, tftiCommand],
+  [imagineCommand.command.name, imagineCommand],
+])
+
+const remixCommand = createRemixCommand(geminiImagenClient)
+
+const prefixCommands = new Map<string, PrefixCommand>([
+  [remixCommand.name, remixCommand]
+])
 
 const client = new Client({
   intents: [
@@ -48,52 +70,14 @@ const client = new Client({
   ]
 })
 
-// Initialize Gemini clients
-const googleGenAI = new GoogleGenAI({ apiKey: geminiApiKey })
-const geminiClient = createGeminiClient({
-  googleGenAI,
-  textGenerationModel: 'gemini-2.5-flash'
-})
-const geminiImagenClient = new GeminiImagenClient(geminiApiKey)
-
-// Attach to client for easy access
-client.geminiClient = geminiClient
-client.geminiImagenClient = geminiImagenClient
-
-// Initialize command collection
-client.commands = new Collection()
-
-// Register slash commands
-client.commands.set(pingCommand.data.name, pingCommand)
-client.commands.set(eightBallCommand.data.name, eightBallCommand)
-client.commands.set(promptCommand.data.name, promptCommand)
-client.commands.set(chatCommand.data.name, chatCommand)
-client.commands.set(tftiCommand.data.name, tftiCommand)
-client.commands.set(imagineCommand.data.name, imagineCommand)
-
-// Bot ready event
-client.once('clientReady', () => {
-  logger.info('Ready!')
-  startActivityRotation(client)
-  logger.info('Initialized slowpoke!')
-})
-
-// Handle slash command interactions
-client.on('interactionCreate', async (interaction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return
 
-  const command = client.commands.get(interaction.commandName)
+  const command = slashCommands.get(interaction.commandName)
   if (!command) return
 
   try {
-    // Pass the appropriate client based on command needs
-    if (command === promptCommand || command === chatCommand) {
-      await command.execute(interaction, client.geminiClient)
-    } else if (command === imagineCommand) {
-      await command.execute(interaction, client.geminiImagenClient)
-    } else {
-      await command.execute(interaction)
-    }
+    command.execute(interaction)
   } catch (error) {
     logger.error({ error, commandName: interaction.commandName }, 'Error executing slash command')
     const errorMessage = 'There was an error while executing this command!'
@@ -106,8 +90,7 @@ client.on('interactionCreate', async (interaction) => {
   }
 })
 
-// Handle prefix commands (for remix)
-client.on('messageCreate', async (message) => {
+client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return
 
   const prefix = '!'
@@ -115,16 +98,24 @@ client.on('messageCreate', async (message) => {
 
   const args = message.content.slice(prefix.length).trim().split(/ +/)
   const commandName = args.shift()?.toLowerCase()
+  if (!commandName) return
 
-  if (commandName === 'remix') {
-    try {
-      await remixCommand.execute(message, args, client.geminiImagenClient)
-    } catch (error) {
-      logger.error({ error }, 'Error executing remix command')
-      await message.reply('There was an error while executing this command!')
-    }
+  const prefixCommand = prefixCommands.get(commandName)
+  if (!prefixCommand) return
+
+  try {
+    prefixCommand.execute(message, args)
+  } catch (error) {
+    logger.error({ error }, 'Error executing remix command')
+    await message.reply('There was an error while executing this command!')
   }
 })
 
-// Login to Discord
+client.once(Events.ClientReady, () => {
+  logger.info('Client ready!')
+  startActivityRotation(client)
+})
+
 client.login(token)
+  .then(() => logger.info('Initialized slowpoke!'))
+  .catch(err => logger.error(err))

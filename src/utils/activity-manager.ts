@@ -2,6 +2,7 @@ import { Client, ActivityType } from 'discord.js'
 import { logger } from './logger'
 
 export const startActivityRotation = (client: Client) => {
+  logger.info('Starting activity rotation...')
   const rotateActivity = () => {
     const activity = getRandomActivity()
     logger.info({ activity }, 'Setting activity data')
@@ -10,6 +11,7 @@ export const startActivityRotation = (client: Client) => {
 
   rotateActivity()
   setInterval(rotateActivity, 60 * 60 * 1000)
+  logger.info('Activity rotation started!')
 }
 
 interface ActivityData {

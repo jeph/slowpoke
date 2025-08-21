@@ -22,5 +22,3 @@ export const logger = pino({
     error: pino.stdSerializers.err
   }
 })
-
-export default logger

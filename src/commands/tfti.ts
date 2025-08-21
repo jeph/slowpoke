@@ -1,8 +1,9 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { logger } from '../utils/logger'
+import { SlashCommand } from '../models/commands'
 
-export const tftiCommand = {
-  data: new SlashCommandBuilder()
+export const createTftiCommand = (): SlashCommand => ({
+  command: new SlashCommandBuilder()
     .setName('tfti')
     .setDescription('Thanks for the invite, asshole'),
 
@@ -101,4 +102,4 @@ export const tftiCommand = {
       await interaction.reply('Sorry, there was an error processing the tfti command.')
     }
   }
-}
+})

@@ -1,7 +1,8 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
+import { SlashCommand } from '../models/commands'
 
-export const pingCommand = {
-  data: new SlashCommandBuilder()
+export const createPingCommand = (): SlashCommand => ({
+  command: new SlashCommandBuilder()
     .setName('ping')
     .setDescription('Test the bot\'s latency'),
 
@@ -25,4 +26,4 @@ export const pingCommand = {
 
     await interaction.editReply({ embeds: [pongEmbed] })
   }
-}
+})

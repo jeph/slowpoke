@@ -1,9 +1,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, AttachmentBuilder } from 'discord.js'
 import { GeminiImagenClient } from '../utils/gemini-imagen-client'
 import { logger } from '../utils/logger'
+import { SlashCommand } from '../models/commands'
 
-export const imagineCommand = {
-  data: new SlashCommandBuilder()
+export const createImagineCommand = (geminiImagenClient: GeminiImagenClient): SlashCommand => ({
+  command: new SlashCommandBuilder()
     .setName('imagine')
     .setDescription('Image generation with slowpoke')
     .addStringOption(option =>
@@ -13,7 +14,7 @@ export const imagineCommand = {
         .setRequired(true)
     ),
 
-  async execute (interaction: ChatInputCommandInteraction, geminiImagenClient: GeminiImagenClient) {
+  async execute (interaction: ChatInputCommandInteraction) {
     // Defer the reply as AI models take time to respond
     await interaction.deferReply()
 
@@ -47,4 +48,4 @@ export const imagineCommand = {
       await interaction.editReply({ embeds: [errorEmbed] })
     }
   }
-}
+})

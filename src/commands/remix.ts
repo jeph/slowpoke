@@ -1,6 +1,7 @@
 import { Message, EmbedBuilder, AttachmentBuilder } from 'discord.js'
 import { GeminiImagenClient } from '../utils/gemini-imagen-client'
 import { logger } from '../utils/logger'
+import { PrefixCommand } from '../models/commands'
 
 const ERROR_EMBED_COLOR = 0xFF0000 // Red
 
@@ -63,8 +64,9 @@ async function getImageDataFromEmbed (message: Message): Promise<ImageData | nul
   }
 }
 
-export const remixCommand = {
-  async execute (message: Message, args: string[], geminiImagenClient: GeminiImagenClient) {
+export const createRemixCommand = (geminiImagenClient: GeminiImagenClient): PrefixCommand => ({
+  name: 'remix',
+  async execute (message: Message, args: string[]) {
     const prompt = args.join(' ')
 
     if (!prompt) {
@@ -148,4 +150,4 @@ export const remixCommand = {
       await message.reply({ embeds: [embed] })
     }
   }
-}
+})
