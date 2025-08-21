@@ -1,7 +1,8 @@
-import { GoogleGenAI } from '@google/genai'
+import {GoogleGenAI, Modality} from '@google/genai'
 
 export interface GeminiClient {
   prompt(prompt: PromptOptions): Promise<string>;
+  generateImage(options: GenerateImageOptions): Promise<Buffer>;
 }
 
 export interface GeminiClientOptions {
@@ -38,6 +39,32 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
       }
 
       return response.text
+    },
+
+    async generateImage (options: GenerateImageOptions): Promise<Buffer> {
+      const { prompt } = options
+      const response = await googleGenAI.models.generateContent(
+          {
+            model: 'gemini-2.0-flash-preview-image-generation',
+            contents: prompt,
+            config: {
+              responseModalities: [Modality.TEXT, Modality.IMAGE]
+            }
+          }
+      )
+
+      const imageParts = response.candidates?.[0]?.content?.parts?.filter(part => part.inlineData)
+      if (!imageParts || imageParts.length === 0) {
+        throw new Error('No image data returned from Gemini')
+      }
+
+      const imageData = imageParts.map(part => {
+        if (!part.inlineData || !part.inlineData.data) {
+          throw new Error('Missing inline data')
+        }
+        return Buffer.from(part.inlineData.data, "base64")
+      })
+      return imageData[0]
     }
   }
 }

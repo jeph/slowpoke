@@ -1,9 +1,9 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, AttachmentBuilder } from 'discord.js'
-import { GeminiImagenClient } from '../utils/gemini-imagen-client'
+import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
 
-export const createImagineCommand = (geminiImagenClient: GeminiImagenClient): SlashCommand => ({
+export const createImagineCommand = (geminiClient: GeminiClient): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('imagine')
     .setDescription('Image generation with slowpoke')
@@ -21,11 +21,11 @@ export const createImagineCommand = (geminiImagenClient: GeminiImagenClient): Sl
     const promptText = interaction.options.get('prompt')?.value as string
 
     try {
-      const response = await geminiImagenClient.prompt({
+      const imageData = await geminiClient.generateImage({
         prompt: promptText
       })
 
-      const attachment = new AttachmentBuilder(response.imageData, { name: 'image.png' })
+      const attachment = new AttachmentBuilder(imageData, { name: 'image.png' })
 
       const embed = new EmbedBuilder()
         .setTitle('Imagine')
