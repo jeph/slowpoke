@@ -1,4 +1,5 @@
-import {GoogleGenAI, Modality} from '@google/genai'
+import { GoogleGenAI, Modality } from '@google/genai'
+import {logger} from "./logger";
 
 export interface GeminiClient {
   prompt(prompt: PromptOptions): Promise<string>;
@@ -24,6 +25,7 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
   return {
     async prompt (options: PromptOptions): Promise<string> {
       const { prompt, systemInstruction } = options
+      logger.info({ prompt, systemInstruction }, 'Sending prompt to Gemini')
       const response = await googleGenAI.models.generateContent(
         {
           model: textGenerationModel,
@@ -35,22 +37,24 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
       )
 
       if (!response.text) {
+        logger.error({ response }, 'No text returned from Gemini')
         throw new Error('No text was returned from the LLM via inference')
       }
 
+      logger.info({ text: response.text }, 'Received response from Gemini')
       return response.text
     },
 
     async generateImage (options: GenerateImageOptions): Promise<Buffer> {
       const { prompt } = options
       const response = await googleGenAI.models.generateContent(
-          {
-            model: 'gemini-2.0-flash-preview-image-generation',
-            contents: prompt,
-            config: {
-              responseModalities: [Modality.TEXT, Modality.IMAGE]
-            }
+        {
+          model: 'gemini-2.0-flash-preview-image-generation',
+          contents: prompt,
+          config: {
+            responseModalities: [Modality.TEXT, Modality.IMAGE]
           }
+        }
       )
 
       const imageParts = response.candidates?.[0]?.content?.parts?.filter(part => part.inlineData)
@@ -62,7 +66,7 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
         if (!part.inlineData || !part.inlineData.data) {
           throw new Error('Missing inline data')
         }
-        return Buffer.from(part.inlineData.data, "base64")
+        return Buffer.from(part.inlineData.data, 'base64')
       })
       return imageData[0]
     }

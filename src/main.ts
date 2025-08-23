@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits } from 'discord.js'
+import { Client, Events, GatewayIntentBits, Partials } from 'discord.js'
 import dotenv from 'dotenv'
 import { GoogleGenAI } from '@google/genai'
 import { createGeminiClient } from './utils/gemini-client'
@@ -66,8 +66,10 @@ const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent
-  ]
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.DirectMessages
+  ],
+  partials: [Partials.Channel]
 })
 
 client.on(Events.InteractionCreate, async (interaction) => {

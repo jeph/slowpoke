@@ -1,4 +1,4 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError } from 'discord.js'
+import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError, Message, Guild } from 'discord.js'
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
@@ -64,7 +64,7 @@ literally), here are some general guidelines on how to respond:
 - Try to be helpful. If people are arguing, try to diffuse the situation or resolve the conflict.
 - If people are asking questions, try to answer them.
 - Be a bit edgy. Not every message needs to be positive, friendly, or politically correct.
-- Find opprotunities to roast and troll people.
+- Find opportunities to roast and troll people.
 - Use emojis, but don't overuse them. Not every message needs an emoji.
 
 `
@@ -75,43 +75,29 @@ export const createChatCommand = (geminiClient: GeminiClient): SlashCommand => (
     .setDescription('Chat with slowpoke'),
 
   async execute (interaction: ChatInputCommandInteraction) {
-    // Defer the reply as LLMs take time to respond
-    await interaction.deferReply()
-
     try {
-      // Fetch recent messages from the channel
+      // Defer the reply as LLMs take time to respond
+      await interaction.deferReply()
+
       const messages = await interaction.channel?.messages.fetch({ limit: 100 })
+      const chronologicalMessages = messages
+        ? trimEmptyLastMessage(
+          [...messages.values()]
+            .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()))
+        : []
+      logger.info({ chronologicalMessages }, 'Fetched recent messages for chat command')
 
-      if (!messages || messages.size === 0) {
-        return await interaction.editReply('No messages found in this channel.')
-      }
+      const displayNames = interaction.guild
+        ? await getDisplayNamesInMessages(chronologicalMessages, interaction.guild)
+        : new Map()
+      logger.info({ displayNames, isGuild: !!interaction.guild }, 'Fetched display names for recent messages')
 
-      // Convert messages to chronological order
-      const messageArray = Array.from(messages.values()).reverse()
-
-      // Get display names for guild members
-      const displayNames = new Map<string, string>()
-      if (interaction.guild) {
-        const authorIds = new Set(messageArray.map(msg => msg.author.id))
-
-        for (const authorId of authorIds) {
-          try {
-            const member = await interaction.guild.members.fetch(authorId)
-            displayNames.set(authorId, member.displayName)
-          } catch (error) {
-            // Member not found, will use global name or username instead
-          }
-        }
-      }
-
-      // Format messages for the AI
-      const formattedMessages = messageArray.map(message => {
-        const name = displayNames.get(message.author.id) ||
-                    message.author.globalName ||
-                    message.author.username
-        const time = message.createdAt.toISOString().slice(0, 16) + 'Z'
+      const formattedMessages = chronologicalMessages.map(message => {
+        const name = displayNames.get(message.author.id) || message.author.globalName || message.author.username
+        const time = message.createdAt.toISOString()
         return `[name: ${name}][time: ${time}][isBot: ${message.author.bot}]: ${message.content}`
       }).join('\n')
+      logger.info({ formattedMessages }, 'Formatted recent messages for LLM')
 
       const response = await geminiClient.prompt({
         prompt: formattedMessages,
@@ -121,10 +107,38 @@ export const createChatCommand = (geminiClient: GeminiClient): SlashCommand => (
       await interaction.editReply(response)
     } catch (error) {
       if (error instanceof DiscordAPIError && error.code === 50001) {
-        return await interaction.editReply("Ah! I'm not able to see the messages in this chat. You might need to add me to the chat or channel before I can chat with you.")
+        return await interaction.editReply(
+          "Ah! I'm not able to see the messages in this chat. You might need to add me to the chat " +
+            'or channel before I can chat with you.'
+        )
       }
       logger.error({ error }, 'Error in chat command')
       await interaction.editReply('Sorry, there was an error processing the chat request.')
     }
-  }
+  },
 })
+
+const getDisplayNamesInMessages = async (messages: Message[], guild: Guild) => {
+  const uniqueAuthorIds = [...new Set(messages.map(msg => msg.author.id))]
+  const displayNames = await Promise.all(
+    uniqueAuthorIds.map(async authorId => {
+      try {
+        const member = await guild.members.fetch(authorId)
+        return [authorId, member.displayName]
+      } catch (error) {
+        logger.info(`Error while retrieving ${authorId}`)
+        return [authorId, null]
+      }
+    })
+  )
+  return new Map(displayNames.filter((entry): entry is [string, string] => entry[1] !== null))
+}
+
+const trimEmptyLastMessage = (messages: Message[]) => {
+  if (messages.length === 0) return messages
+  const lastMessage = messages[messages.length - 1]
+  if (lastMessage.content) {
+    return messages
+  }
+  return messages.slice(0, -1)
+}
