@@ -1,5 +1,5 @@
 {
-  "name": "slowpoke-typescript",
+  "name": "slowpoke",
   "version": "0.1.0",
   "description": "A Discord bot written in TypeScript - converted from Rust",
   "type": "module",

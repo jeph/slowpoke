@@ -19,6 +19,8 @@ import { PrefixCommand, SlashCommand } from './models/commands'
 // Load environment variables
 dotenv.config()
 
+process.title = 'slowpoke'
+
 logger.info('Getting discord token from environment')
 const token = process.env.DISCORD_TOKEN
 if (!token) {
