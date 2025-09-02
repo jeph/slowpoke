@@ -49,7 +49,7 @@ const promptCommand = createPromptCommand(geminiClient)
 const chatCommand = createChatCommand(geminiClient)
 const tftiCommand = createTftiCommand()
 const imagineCommand = createImagineCommand(geminiClient)
-const rollCommand = createRollCommand()
+const rollCommand = createRollCommand(geminiClient)
 
 const slashCommands = new Map<string, SlashCommand>([
   [pingCommand.command.name, pingCommand],
