@@ -12,7 +12,8 @@ import {
   createPingCommand,
   createPromptCommand,
   createRemixCommand,
-  createTftiCommand
+  createTftiCommand,
+  createRollCommand
 } from './commands'
 import { PrefixCommand, SlashCommand } from './models/commands'
 
@@ -48,6 +49,7 @@ const promptCommand = createPromptCommand(geminiClient)
 const chatCommand = createChatCommand(geminiClient)
 const tftiCommand = createTftiCommand()
 const imagineCommand = createImagineCommand(geminiClient)
+const rollCommand = createRollCommand()
 
 const slashCommands = new Map<string, SlashCommand>([
   [pingCommand.command.name, pingCommand],
@@ -56,6 +58,7 @@ const slashCommands = new Map<string, SlashCommand>([
   [chatCommand.command.name, chatCommand],
   [tftiCommand.command.name, tftiCommand],
   [imagineCommand.command.name, imagineCommand],
+  [rollCommand.command.name, rollCommand]
 ])
 
 const remixCommand = createRemixCommand(geminiImagenClient)
@@ -95,6 +98,22 @@ client.on(Events.InteractionCreate, async (interaction) => {
 })
 
 client.on(Events.MessageCreate, async (message) => {
+  // Log every message the bot can see/receive if running in development mode
+  if (process.env.NODE_ENV === 'development') {
+    logger.debug({
+      author: {
+        id: message.author.id,
+        username: message.author.username,
+        discriminator: message.author.discriminator,
+        bot: message.author.bot
+      },
+      content: message.content,
+      channelId: message.channel.id,
+      guildId: message.guild?.id ?? null,
+      isDM: message.guild === null
+    }, 'Received message')
+  }
+
   if (message.author.bot) return
 
   const prefix = '!'
