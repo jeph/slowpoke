@@ -8,7 +8,6 @@
     "build": "tsc",
     "start": "node dist/main.js",
     "dev": "tsx src/main.ts",
-    "deploy-commands": "NODE_OPTIONS=\"--experimental-specifier-resolution=node\" TS_NODE_PROJECT=tsconfig.node.json node --loader ts-node/esm src/deploy-commands.ts",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean && npm run lint",
     "lint": "eslint .",
@@ -31,7 +30,6 @@
   "devDependencies": {
     "@types/node": "^24.3.0",
     "neostandard": "^0.12.2",
-    "ts-node": "^10.9.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2"
   }
