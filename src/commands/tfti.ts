@@ -22,17 +22,13 @@ export const createTftiCommand = (): SlashCommand => ({
         return
       }
 
-      const firstNonTftiMessageIndex = [...messages.values()].map(message => {
+      const tftiMultiplier = [...messages.values()].map(message => {
         const isBotMessage = message.author.id === interaction.client.user?.id
         const isTfti = message.embeds.some(embed =>
           embed.title?.startsWith('😤 Tfti')
         )
         return isBotMessage && isTfti
       }).findIndex(bool => bool === false)
-
-      const tftiMultiplier = firstNonTftiMessageIndex !== -1
-        ? firstNonTftiMessageIndex
-        : 0
 
       switch (tftiMultiplier) {
         case 0:
