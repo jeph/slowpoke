@@ -1,6 +1,5 @@
 import { GoogleGenAI } from '@google/genai'
 import { logger } from './logger'
-import { GeminiClient, GeminiClientOptions, PromptOptions } from './gemini-client'
 
 export interface GeminiImagenPrompt {
   prompt: string;

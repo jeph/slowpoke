@@ -1,5 +1,5 @@
 import { GoogleGenAI, Modality } from '@google/genai'
-import {logger} from "./logger";
+import { logger } from './logger'
 
 export interface GeminiClient {
   prompt(prompt: PromptOptions): Promise<string>;
