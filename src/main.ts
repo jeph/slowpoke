@@ -87,11 +87,10 @@ const client = new Client({
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return
-
-  const command = slashCommands.get(interaction.commandName)
-  if (!command) return
-
   try {
+    const command = slashCommands.get(interaction.commandName)
+    if (!command) return
+
     command.execute(interaction)
   } catch (error) {
     logger.error({ error, commandName: interaction.commandName }, 'Error executing slash command')
