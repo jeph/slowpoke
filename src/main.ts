@@ -5,6 +5,7 @@ import { createGeminiClient } from './utils/gemini-client'
 import { GeminiImagenClient } from './utils/gemini-imagen-client'
 import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
+import { createCommandRegistrar } from './utils/register-commands'
 import {
   createChatCommand,
   createEightBallCommand,
@@ -28,6 +29,13 @@ if (!token) {
   throw new Error('DISCORD_TOKEN was not found')
 }
 logger.info('Successfully got discord token from environment')
+
+logger.info('Getting application id from environment')
+const discordApplicationId = process.env.DISCORD_APPLICATION_ID
+if (!discordApplicationId) {
+  throw new Error('DISCORD_APPLICATION_ID was not found')
+}
+logger.info('Successfully got application id from environment')
 
 logger.info('Getting gemini api key from secret store')
 const geminiApiKey = process.env.GEMINI_API_KEY
@@ -60,6 +68,8 @@ const slashCommands = new Map<string, SlashCommand>([
   [imagineCommand.command.name, imagineCommand],
   [rollCommand.command.name, rollCommand]
 ])
+
+const commandRegistrar = createCommandRegistrar(token, discordApplicationId)
 
 const remixCommand = createRemixCommand(geminiImagenClient)
 
@@ -134,8 +144,9 @@ client.on(Events.MessageCreate, async (message) => {
   }
 })
 
-client.once(Events.ClientReady, () => {
+client.once(Events.ClientReady, async () => {
   logger.info('Client ready!')
+  await commandRegistrar.register([...slashCommands.values()])
   startActivityRotation(client)
 })
 
