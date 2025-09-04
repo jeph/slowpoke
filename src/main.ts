@@ -5,16 +5,15 @@ import { createGeminiClient } from './utils/gemini-client'
 import { GeminiImagenClient } from './utils/gemini-imagen-client'
 import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
-import {
-  createChatCommand,
-  createEightBallCommand,
-  createImagineCommand,
-  createPingCommand,
-  createPromptCommand,
-  createRemixCommand,
-  createTftiCommand,
-  createRollCommand
-} from './commands'
+import { createCommandRegistrar } from './utils/command-registrar'
+import { createChatCommand } from './commands/chat'
+import { createEightBallCommand } from './commands/eight-ball'
+import { createImagineCommand } from './commands/imagine'
+import { createPingCommand } from './commands/ping'
+import { createPromptCommand } from './commands/prompt'
+import { createRemixCommand } from './commands/remix'
+import { createTftiCommand } from './commands/tfti'
+import { createRollCommand } from './commands/roll'
 import { PrefixCommand, SlashCommand } from './models/commands'
 
 // Load environment variables
@@ -28,6 +27,13 @@ if (!token) {
   throw new Error('DISCORD_TOKEN was not found')
 }
 logger.info('Successfully got discord token from environment')
+
+logger.info('Getting application id from environment')
+const discordApplicationId = process.env.DISCORD_APPLICATION_ID
+if (!discordApplicationId) {
+  throw new Error('DISCORD_APPLICATION_ID was not found')
+}
+logger.info('Successfully got application id from environment')
 
 logger.info('Getting gemini api key from secret store')
 const geminiApiKey = process.env.GEMINI_API_KEY
@@ -61,6 +67,8 @@ const slashCommands = new Map<string, SlashCommand>([
   [rollCommand.command.name, rollCommand]
 ])
 
+const commandRegistrar = createCommandRegistrar(token, discordApplicationId)
+
 const remixCommand = createRemixCommand(geminiImagenClient)
 
 const prefixCommands = new Map<string, PrefixCommand>([
@@ -91,29 +99,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({ content: errorMessage, ephemeral: true })
-    } else {
-      await interaction.reply({ content: errorMessage, ephemeral: true })
+      return
     }
+    await interaction.reply({ content: errorMessage, ephemeral: true })
   }
 })
 
 client.on(Events.MessageCreate, async (message) => {
-  // Log every message the bot can see/receive if running in development mode
-  if (process.env.NODE_ENV === 'development') {
-    logger.debug({
-      author: {
-        id: message.author.id,
-        username: message.author.username,
-        discriminator: message.author.discriminator,
-        bot: message.author.bot
-      },
-      content: message.content,
-      channelId: message.channel.id,
-      guildId: message.guild?.id ?? null,
-      isDM: message.guild === null
-    }, 'Received message')
-  }
-
   if (message.author.bot) return
 
   const prefix = '!'
@@ -134,8 +126,9 @@ client.on(Events.MessageCreate, async (message) => {
   }
 })
 
-client.once(Events.ClientReady, () => {
+client.once(Events.ClientReady, async () => {
   logger.info('Client ready!')
+  await commandRegistrar.register([...slashCommands.values()])
   startActivityRotation(client)
 })
 

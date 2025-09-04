@@ -9,29 +9,26 @@ export const createTftiCommand = (): SlashCommand => ({
 
   async execute (interaction: ChatInputCommandInteraction) {
     try {
-      // Fetch recent messages to count consecutive tfti messages
-      const messages = await interaction.channel?.messages.fetch({ limit: 9 })
-
-      let tftiMultiplier = 0
-      if (messages) {
-        const messageArray = Array.from(messages.values())
-
-        for (const message of messageArray) {
-          const isBotMessage = message.author.id === interaction.client.user?.id
-          const isTfti = message.embeds.some(embed =>
-            embed.title?.includes('😤 Tfti')
-          )
-
-          if (isBotMessage && isTfti) {
-            tftiMultiplier++
-          } else {
-            break // Stop counting once we hit a non-tfti message
-          }
-        }
-      }
-
+      const messages = await interaction.channel?.messages.fetch({ limit: 10 })
       const embed = new EmbedBuilder()
         .setURL('https://youtube.com/shorts/pFmq2xu8Hvw?si=ysapcGMaM6YqEcOI')
+
+      if (!messages) {
+        embed
+          .setTitle('😤 Tfti')
+          .setDescription('Thanks for the invite, asshole')
+          .setColor(0xF38BA8) // RGB(243, 139, 168)
+        await interaction.reply({ embeds: [embed] })
+        return
+      }
+
+      const tftiMultiplier = [...messages.values()].map(message => {
+        const isBotMessage = message.author.id === interaction.client.user?.id
+        const isTfti = message.embeds.some(embed =>
+          embed.title?.startsWith('😤 Tfti')
+        )
+        return isBotMessage && isTfti
+      }).findIndex(bool => bool === false)
 
       switch (tftiMultiplier) {
         case 0:
@@ -98,8 +95,13 @@ export const createTftiCommand = (): SlashCommand => ({
 
       await interaction.reply({ embeds: [embed] })
     } catch (error) {
-      logger.error({ error }, 'Error in tfti command')
-      await interaction.reply('Sorry, there was an error processing the tfti command.')
+      logger.error({ error }, 'Error in tfti command. Returning default tfti message.')
+      const embed = new EmbedBuilder()
+        .setURL('https://youtube.com/shorts/pFmq2xu8Hvw?si=ysapcGMaM6YqEcOI')
+        .setTitle('😤 Tfti')
+        .setDescription('Thanks for the invite, asshole')
+        .setColor(0xF38BA8) // RGB(243, 139, 168)
+      await interaction.reply({ embeds: [embed] })
     }
   }
 })
