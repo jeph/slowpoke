@@ -77,7 +77,7 @@ export const createEightBallCommand = (): SlashCommand => ({
     ),
 
   async execute (interaction: ChatInputCommandInteraction) {
-    logger.debug('Start processing 8 ball command')
+    logger.info('Start processing 8 ball command')
 
     const question = interaction.options.get('question')?.value as string | undefined
     const eightBallResponse = getRandomChoice(EIGHT_BALL_RESPONSES)
@@ -87,23 +87,27 @@ export const createEightBallCommand = (): SlashCommand => ({
       .setColor(color)
       .setTitle('8 Ball Has Spoken')
 
-    if (question) {
-      logger.debug('Received question. Formatting question in the embed.')
-      if (question.length > 254) {
-        embed.setDescription('🎱 Your question is too long! Try a shorter question.')
-      } else {
-        embed.addFields({
-          name: `❓ ${question}`,
-          value: `🎱 ${eightBallResponse}`,
-          inline: false
-        })
-      }
-    } else {
-      logger.debug('Received no question. Returning without a question in the embed.')
+    if (!question) {
+      logger.info('Received no question. Returning without a question in the embed.')
       embed.setDescription(`🎱 ${eightBallResponse}`)
+      await interaction.reply({ embeds: [embed] })
+      return
     }
 
+    if (question.length > 254) {
+      logger.info('Received question that is too long. Returning too long error message.')
+      embed.setDescription('🎱 Your question is too long! Try a shorter question.')
+      await interaction.reply({ embeds: [embed] })
+      return
+    }
+
+    logger.info(`Received question: ${question}`)
+    logger.info('Returning response...')
+    embed.addFields({
+      name: `❓ ${question}`,
+      value: `🎱 ${eightBallResponse}`,
+      inline: false
+    })
     await interaction.reply({ embeds: [embed] })
-    logger.debug('Finished processing 8 ball command')
   }
 })
