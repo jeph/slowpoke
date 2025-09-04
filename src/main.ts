@@ -6,16 +6,14 @@ import { GeminiImagenClient } from './utils/gemini-imagen-client'
 import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
 import { createCommandRegistrar } from './utils/register-commands'
-import {
-  createChatCommand,
-  createEightBallCommand,
-  createImagineCommand,
-  createPingCommand,
-  createPromptCommand,
-  createRemixCommand,
-  createTftiCommand,
-  createRollCommand
-} from './commands'
+import { createChatCommand } from './commands/chat'
+import { createEightBallCommand } from './commands/eight-ball'
+import { createImagineCommand } from './commands/imagine'
+import { createPingCommand } from './commands/ping'
+import { createPromptCommand } from './commands/prompt'
+import { createRemixCommand } from './commands/remix'
+import { createTftiCommand } from './commands/tfti'
+import { createRollCommand } from './commands/roll'
 import { PrefixCommand, SlashCommand } from './models/commands'
 
 // Load environment variables

@@ -50,7 +50,7 @@ export const createPromptCommand = (geminiClient: GeminiClient): SlashCommand =>
         }
       } catch (error) {
         logger.error({ error }, 'Error in prompt command')
-        await interaction.editReply('Sorry, there was an error processing your request.')
+        await interaction.followUp('Sorry, there was an error processing your request.')
       }
     }
   }
