@@ -55,7 +55,7 @@ const pingCommand = createPingCommand(colorProvider)
 const eightBallCommand = createEightBallCommand(colorProvider)
 const promptCommand = createPromptCommand(geminiClient)
 const chatCommand = createChatCommand(geminiClient)
-const tftiCommand = createTftiCommand()
+const tftiCommand = createTftiCommand(colorProvider)
 const imagineCommand = createImagineCommand(geminiClient)
 const rollCommand = createRollCommand(colorProvider)
 
@@ -100,10 +100,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     const errorMessage = 'There was an error while executing this command!'
 
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content: errorMessage, ephemeral: true })
+      await interaction.followUp({ content: errorMessage })
       return
     }
-    await interaction.reply({ content: errorMessage, ephemeral: true })
+    await interaction.reply({ content: errorMessage })
   }
 })
 
