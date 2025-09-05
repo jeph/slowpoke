@@ -56,7 +56,7 @@ const eightBallCommand = createEightBallCommand(colorProvider)
 const promptCommand = createPromptCommand(geminiClient, colorProvider)
 const chatCommand = createChatCommand(geminiClient)
 const tftiCommand = createTftiCommand(colorProvider)
-const imagineCommand = createImagineCommand(geminiClient)
+const imagineCommand = createImagineCommand(geminiClient, colorProvider)
 const rollCommand = createRollCommand(colorProvider)
 
 const slashCommands = new Map<string, SlashCommand>([

@@ -3,6 +3,7 @@ export interface ColorProvider {
   getSuccessColor: () => number;
   getWarningColor: () => number;
   getErrorColor: () => number;
+  getPrimaryColor: () => number;
 }
 
 export const createColorProvider = (): ColorProvider => {
@@ -10,7 +11,8 @@ export const createColorProvider = (): ColorProvider => {
     getRandomColor: () => allColors[Math.floor(Math.random() * allColors.length)],
     getSuccessColor: () => emerald,
     getWarningColor: () => sunFlower,
-    getErrorColor: () => pomegranate
+    getErrorColor: () => pomegranate,
+    getPrimaryColor: () => peterRiver
   }
 }
 

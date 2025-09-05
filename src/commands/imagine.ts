@@ -2,8 +2,9 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, Attachm
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
+import { ColorProvider } from '../utils/color-provider'
 
-export const createImagineCommand = (geminiClient: GeminiClient): SlashCommand => ({
+export const createImagineCommand = (geminiClient: GeminiClient, colorProvider: ColorProvider): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('imagine')
     .setDescription('Image generation with slowpoke')
@@ -30,7 +31,7 @@ export const createImagineCommand = (geminiClient: GeminiClient): SlashCommand =
       const embed = new EmbedBuilder()
         .setTitle('Imagine')
         .setDescription(promptText)
-        .setColor(0x89DCEB) // RGB(137, 220, 235)
+        .setColor(colorProvider.getPrimaryColor())
         .setImage('attachment://image.png')
 
       await interaction.editReply({
@@ -43,7 +44,7 @@ export const createImagineCommand = (geminiClient: GeminiClient): SlashCommand =
       const errorEmbed = new EmbedBuilder()
         .setTitle('Error imagining image')
         .setDescription('Failed to imagine image. Try altering the prompt or trying again later.')
-        .setColor(0x89DCEB) // RGB(137, 220, 235)
+        .setColor(colorProvider.getErrorColor())
 
       await interaction.editReply({ embeds: [errorEmbed] })
     }
