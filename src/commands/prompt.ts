@@ -3,8 +3,9 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
+import { ColorProvider } from '../utils/color-provider'
 
-export const createPromptCommand = (geminiClient: GeminiClient): SlashCommand => {
+export const createPromptCommand = (geminiClient: GeminiClient, colorProvider: ColorProvider): SlashCommand => {
   return {
     command: new SlashCommandBuilder()
       .setName('prompt')
@@ -40,7 +41,7 @@ export const createPromptCommand = (geminiClient: GeminiClient): SlashCommand =>
 
         const embeds = chunks.map((chunk, index) => {
           const embed = new EmbedBuilder()
-            .setColor(0xA6E3A1)
+            .setColor(colorProvider.getSuccessColor())
             .setDescription(chunk)
 
           if (chunks.length > 1) {

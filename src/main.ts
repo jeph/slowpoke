@@ -53,7 +53,7 @@ const colorProvider = createColorProvider()
 
 const pingCommand = createPingCommand(colorProvider)
 const eightBallCommand = createEightBallCommand(colorProvider)
-const promptCommand = createPromptCommand(geminiClient)
+const promptCommand = createPromptCommand(geminiClient, colorProvider)
 const chatCommand = createChatCommand(geminiClient)
 const tftiCommand = createTftiCommand(colorProvider)
 const imagineCommand = createImagineCommand(geminiClient)
