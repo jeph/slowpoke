@@ -6,6 +6,7 @@ import { GeminiImagenClient } from './utils/gemini-imagen-client'
 import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
 import { createCommandRegistrar } from './utils/command-registrar'
+import { createColorProvider } from './utils/color-provider'
 import { createChatCommand } from './commands/chat'
 import { createEightBallCommand } from './commands/eight-ball'
 import { createImagineCommand } from './commands/imagine'
@@ -48,14 +49,15 @@ const geminiClient = createGeminiClient({
   textGenerationModel: 'gemini-2.5-flash'
 })
 const geminiImagenClient = new GeminiImagenClient(geminiApiKey)
+const colorProvider = createColorProvider()
 
-const pingCommand = createPingCommand()
-const eightBallCommand = createEightBallCommand()
+const pingCommand = createPingCommand(colorProvider)
+const eightBallCommand = createEightBallCommand(colorProvider)
 const promptCommand = createPromptCommand(geminiClient)
 const chatCommand = createChatCommand(geminiClient)
 const tftiCommand = createTftiCommand()
 const imagineCommand = createImagineCommand(geminiClient)
-const rollCommand = createRollCommand()
+const rollCommand = createRollCommand(colorProvider)
 
 const slashCommands = new Map<string, SlashCommand>([
   [pingCommand.command.name, pingCommand],

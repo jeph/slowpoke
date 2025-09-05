@@ -1,6 +1,7 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
+import { ColorProvider } from '../utils/color-provider'
 
 const EIGHT_BALL_RESPONSES = [
   'It is certain',
@@ -45,27 +46,7 @@ const EIGHT_BALL_RESPONSES = [
   'Signs point to no',
 ]
 
-const COLORS = [
-  0xF5C2E7, // (245, 194, 231)
-  0xCBA6F7, // (203, 166, 247)
-  0xF38BA8, // (243, 139, 168)
-  0xEBA0AC, // (235, 160, 172)
-  0xFAB387, // (250, 179, 135)
-  0xF9E2AF, // (249, 226, 175)
-  0xA6E3A1, // (166, 227, 161)
-  0x94E2D5, // (148, 226, 213)
-  0x89DCEB, // (137, 220, 235)
-  0x74C7EC, // (116, 199, 236)
-  0x89B4FA, // (137, 180, 250)
-  0xB4BEFE, // (180, 190, 254)
-]
-
-function getRandomChoice<T> (array: T[]): T {
-  const randomIndex = Math.floor(Math.random() * array.length)
-  return array[randomIndex]
-}
-
-export const createEightBallCommand = (): SlashCommand => ({
+export const createEightBallCommand = (colorProvider: ColorProvider): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('8ball')
     .setDescription('Ask the 8 ball a question')
@@ -80,8 +61,8 @@ export const createEightBallCommand = (): SlashCommand => ({
     logger.info('Start processing 8 ball command')
 
     const question = interaction.options.getString('question')
-    const eightBallResponse = getRandomChoice(EIGHT_BALL_RESPONSES)
-    const color = getRandomChoice(COLORS)
+    const eightBallResponse = EIGHT_BALL_RESPONSES[Math.floor(Math.random() * EIGHT_BALL_RESPONSES.length)]
+    const color = colorProvider.getRandomColor()
 
     const embed = new EmbedBuilder()
       .setColor(color)

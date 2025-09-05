@@ -1,14 +1,15 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { SlashCommand } from '../models/commands'
+import { ColorProvider } from '../utils/color-provider'
 
-export const createPingCommand = (): SlashCommand => ({
+export const createPingCommand = (colorProvider: ColorProvider): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('ping')
     .setDescription('Test the bot\'s latency'),
 
   async execute (interaction: ChatInputCommandInteraction) {
     const pingEmbed = new EmbedBuilder()
-      .setColor(0xFAB387) // RGB(250, 179, 135)
+      .setColor(colorProvider.getWarningColor())
       .setTitle('🌐 Ping!')
       .setDescription('Pinging...')
 
@@ -20,7 +21,7 @@ export const createPingCommand = (): SlashCommand => ({
     await new Promise(resolve => setTimeout(resolve, 1000))
 
     const pongEmbed = new EmbedBuilder()
-      .setColor(0x74C7EC) // RGB(116, 199, 236)
+      .setColor(colorProvider.getSuccessColor())
       .setTitle('🏓 Pong!')
       .setDescription(`Latency: ${finish} ms`)
 
