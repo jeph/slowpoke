@@ -79,7 +79,7 @@ export const createEightBallCommand = (): SlashCommand => ({
   async execute (interaction: ChatInputCommandInteraction) {
     logger.info('Start processing 8 ball command')
 
-    const question = interaction.options.get('question')?.value as string | undefined
+    const question = interaction.options.getString('question')
     const eightBallResponse = getRandomChoice(EIGHT_BALL_RESPONSES)
     const color = getRandomChoice(COLORS)
 

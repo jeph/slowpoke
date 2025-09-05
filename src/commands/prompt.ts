@@ -21,7 +21,12 @@ export const createPromptCommand = (geminiClient: GeminiClient): SlashCommand =>
         // Defer the reply as LLMs take time to respond
         await interaction.deferReply()
 
-        const promptText = interaction.options.get('prompt')?.value as string
+        const promptText = interaction.options.getString('prompt')
+
+        if (!promptText) {
+          await interaction.followUp('Please provide a prompt!')
+          return
+        }
 
         const response = await geminiClient.prompt({
           prompt: promptText,

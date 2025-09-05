@@ -13,26 +13,29 @@ function getRandomColor () {
 export const createRollCommand = (): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('roll')
-    .setDescription('Roll a dice with custom sides')
+    .setDescription('Roll an n sided die')
     .addIntegerOption(option =>
       option
         .setName('sides')
-        .setDescription('Number of sides on the dice (default is 6)')
+        .setDescription('Number of sides on the die (default is 6)')
         .setRequired(false)
         .setMinValue(2)
         .setMaxValue(100)
     ),
+
   async execute (interaction: ChatInputCommandInteraction) {
-    const sides = interaction.options.getInteger('sides') || 6
+    const sides = interaction.options.getInteger('sides') ?? 6
+
     if (sides < 2 || sides > 100) {
-      await interaction.reply({ content: 'Please provide a valid number of sides between 2 and 100.', ephemeral: true })
+      await interaction.reply({ content: 'Please provide a valid number of sides between 2 and 100.' })
       return
     }
+
     const diceRoll = Math.floor(Math.random() * sides) + 1
     const embed = new EmbedBuilder()
       .setColor(getRandomColor())
-      .setTitle('Dice Roll')
-      .setDescription(`🎲 You rolled a **${diceRoll}** on a D${sides}!`)
+      .setTitle('**Roll**')
+      .setDescription(`🍀 Rolled a **${diceRoll}**\n🎲 **d${sides}**`)
     await interaction.reply({ embeds: [embed] })
   }
 })
