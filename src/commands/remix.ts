@@ -36,7 +36,9 @@ export const createRemixCommand = (geminiClient: GeminiClient, colorProvider: Co
       logger.info('Got reply message')
 
       const imageDataFromAttachments = await getFirstImageFromAttachments(replyMessage)
-      const imageDataFromEmbed = !imageDataFromAttachments ? await getImageDataFromEmbed(replyMessage) : undefined
+      const imageDataFromEmbed = !imageDataFromAttachments
+        ? await getImageDataFromEmbed(replyMessage)
+        : undefined
 
       if (!imageDataFromAttachments && !imageDataFromEmbed) {
         logger.info('No image found in attachments or embeds of the replied message')
@@ -49,8 +51,18 @@ export const createRemixCommand = (geminiClient: GeminiClient, colorProvider: Co
         return
       }
 
-      const imageData = imageDataFromAttachments || imageDataFromEmbed
-      const [mimeType, imageBuffer] = imageData!
+      const imageData = imageDataFromAttachments ?? imageDataFromEmbed
+      if (!imageData) {
+        logger.info('Image data is undefined after checks, this should not happen')
+        const embed = new EmbedBuilder()
+          .setTitle('Error getting image')
+          .setDescription('Could not extract image from the referenced message.')
+          .setColor(colorProvider.getErrorColor())
+
+        await message.reply({ embeds: [embed] })
+        return
+      }
+      const { mimeType, buffer: imageBuffer } = imageData
 
       const response = await geminiClient.editImage({
         prompt,
@@ -72,7 +84,10 @@ export const createRemixCommand = (geminiClient: GeminiClient, colorProvider: Co
   }
 })
 
-type ImageData = [string, Buffer] // [mimeType, imageData]
+interface ImageData {
+  mimeType: string;
+  buffer: Buffer;
+}
 
 async function getFirstImageFromAttachments (message: Message): Promise<ImageData | undefined> {
   logger.info('Getting first image from message attachments...')
@@ -92,8 +107,8 @@ async function getFirstImageFromAttachments (message: Message): Promise<ImageDat
     throw new Error(`Failed to fetch image from attachment URL: ${response}`)
   }
   const arrayBuffer = await response.arrayBuffer()
-  const imageData = Buffer.from(arrayBuffer)
-  return [imageAttachment.contentType, imageData]
+  const buffer = Buffer.from(arrayBuffer)
+  return { mimeType: imageAttachment.contentType, buffer }
 }
 
 async function getImageDataFromEmbed (message: Message): Promise<ImageData | undefined> {
@@ -114,7 +129,7 @@ async function getImageDataFromEmbed (message: Message): Promise<ImageData | und
   }
 
   const arrayBuffer = await response.arrayBuffer()
-  const imageData = Buffer.from(arrayBuffer)
+  const buffer = Buffer.from(arrayBuffer)
 
-  return [mimeType, imageData]
+  return { mimeType, buffer }
 }
