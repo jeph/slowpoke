@@ -1,0 +1,11 @@
+# Example Docker Compose file for running slowpoke
+version: '3.8'
+services:
+  slowpoke:
+    image: ghcr.io/jeph/slowpoke:latest
+    container_name: slowpoke_app
+    restart: unless-stopped
+    environment:
+      DISCORD_TOKEN: "your_actual_discord_token_here"
+      GEMINI_API_KEY: "your_actual_gemini_api_key_here"
+      DISCORD_APPLICATION_ID: "your_actual_discord_application_id_here"
