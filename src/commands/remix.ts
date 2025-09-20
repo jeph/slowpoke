@@ -4,7 +4,10 @@ import { logger } from '../utils/logger'
 import { PrefixCommand } from '../models/commands'
 import { ColorProvider } from '../utils/color-provider'
 
-export const createRemixCommand = (geminiClient: GeminiClient, colorProvider: ColorProvider): PrefixCommand => ({
+export const createRemixCommand = (
+  geminiClient: GeminiClient,
+  colorProvider: ColorProvider
+): PrefixCommand => ({
   name: 'remix',
   async execute (message) {
     const prompt = message.content.replace(/^!remix\s*/, '').trim()
