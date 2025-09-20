@@ -1,9 +1,10 @@
-import { GoogleGenAI, Modality } from '@google/genai'
+import { GoogleGenAI, Modality, GenerateContentResponse } from '@google/genai'
 import { logger } from './logger'
 
 export interface GeminiClient {
   prompt(prompt: PromptOptions): Promise<string>;
   generateImage(options: GenerateImageOptions): Promise<Buffer>;
+  editImage(options: EditImageOptions): Promise<Buffer>;
 }
 
 export interface GeminiClientOptions {
@@ -18,6 +19,12 @@ export interface PromptOptions {
 
 export interface GenerateImageOptions {
   prompt: string;
+}
+
+export interface EditImageOptions {
+  prompt: string;
+  imageMimeType: string;
+  imageData: Buffer;
 }
 
 export const createGeminiClient = (options: GeminiClientOptions): GeminiClient => {
@@ -57,18 +64,44 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
         }
       )
 
-      const imageParts = response.candidates?.[0]?.content?.parts?.filter(part => part.inlineData)
-      if (!imageParts || imageParts.length === 0) {
-        throw new Error('No image data returned from Gemini')
-      }
+      return parseImageResponse(response)
+    },
 
-      const imageData = imageParts.map(part => {
-        if (!part.inlineData || !part.inlineData.data) {
-          throw new Error('Missing inline data')
+    async editImage (options: EditImageOptions): Promise<Buffer> {
+      const { prompt, imageMimeType, imageData } = options
+      const base64Image = imageData.toString('base64')
+
+      const contents = [
+        { text: prompt },
+        {
+          inlineData: {
+            mimeType: imageMimeType,
+            data: base64Image
+          }
         }
-        return Buffer.from(part.inlineData.data, 'base64')
+      ]
+
+      const response = await googleGenAI.models.generateContent({
+        model: 'gemini-2.5-flash-image-preview',
+        contents
       })
-      return imageData[0]
+
+      return parseImageResponse(response)
     }
   }
+}
+
+const parseImageResponse = (response: GenerateContentResponse): Buffer => {
+  const imageParts = response.candidates?.[0]?.content?.parts?.filter(part => part.inlineData)
+  if (!imageParts || imageParts.length === 0) {
+    throw new Error('No image data returned from Gemini')
+  }
+
+  const imageData = imageParts.map(part => {
+    if (!part.inlineData || !part.inlineData.data) {
+      throw new Error('Missing inline data')
+    }
+    return Buffer.from(part.inlineData.data, 'base64')
+  })
+  return imageData[0]
 }

@@ -7,5 +7,5 @@ export interface SlashCommand {
 
 export interface PrefixCommand {
   name: string;
-  execute: (message: Message, args: string[]) => void
+  execute: (message: Message) => void
 }

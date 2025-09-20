@@ -68,7 +68,7 @@ const slashCommands = new Map<string, SlashCommand>(
 const commandRegistrar = createCommandRegistrar(token, discordApplicationId)
 
 const prefixCommandList: PrefixCommand[] = [
-  createRemixCommand(geminiImagenClient)
+  createRemixCommand(geminiClient, colorProvider)
 ]
 
 const prefixCommands = new Map<string, PrefixCommand>(
@@ -119,7 +119,7 @@ client.on(Events.MessageCreate, async (message) => {
   if (!prefixCommand) return
 
   try {
-    prefixCommand.execute(message, args)
+    prefixCommand.execute(message)
   } catch (error) {
     logger.error({ error }, 'Error executing prefix command')
     await message.reply('There was an error while executing this command!')
