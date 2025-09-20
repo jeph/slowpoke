@@ -10,6 +10,7 @@ export interface GeminiClient {
 export interface GeminiClientOptions {
   googleGenAI: GoogleGenAI;
   textGenerationModel: string;
+  imageGenerationModel: string;
 }
 
 export interface PromptOptions {
@@ -28,7 +29,7 @@ export interface EditImageOptions {
 }
 
 export const createGeminiClient = (options: GeminiClientOptions): GeminiClient => {
-  const { googleGenAI, textGenerationModel } = options
+  const { googleGenAI, textGenerationModel, imageGenerationModel } = options
   return {
     async prompt (options: PromptOptions): Promise<string> {
       const { prompt, systemInstruction } = options
@@ -56,7 +57,7 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
       const { prompt } = options
       const response = await googleGenAI.models.generateContent(
         {
-          model: 'gemini-2.0-flash-preview-image-generation',
+          model: imageGenerationModel,
           contents: prompt,
           config: {
             responseModalities: [Modality.TEXT, Modality.IMAGE]
@@ -82,7 +83,7 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
       ]
 
       const response = await googleGenAI.models.generateContent({
-        model: 'gemini-2.0-flash-preview-image-generation',
+        model: imageGenerationModel,
         contents,
         config: {
           responseModalities: [Modality.TEXT, Modality.IMAGE]

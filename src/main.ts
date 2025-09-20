@@ -45,7 +45,8 @@ logger.info('Successfully got gemini api key from environment')
 const googleGenAI = new GoogleGenAI({ apiKey: geminiApiKey })
 const geminiClient = createGeminiClient({
   googleGenAI,
-  textGenerationModel: 'gemini-2.5-flash'
+  textGenerationModel: 'gemini-2.5-flash',
+  imageGenerationModel: 'gemini-2.0-flash-preview-image-generation'
 })
 const colorProvider = createColorProvider()
 
