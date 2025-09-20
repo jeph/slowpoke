@@ -1,21 +1,23 @@
 # ---- Build application ----
-FROM rust:1.88-slim AS builder
+FROM node:24-slim AS builder
 
 WORKDIR /usr/src/slowpoke
 
-RUN apt-get update && apt-get install -y \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Copy package files first for better caching
+COPY package.json package-lock.json ./
 
-COPY Cargo.toml Cargo.lock ./
-COPY ./resources ./resources
+RUN npm ci
+
+# Copy source code
 COPY ./src ./src
+COPY tsconfig.json ./
+COPY eslint.config.mjs ./
 
-RUN cargo build --release --locked
+# Build the application
+RUN npm run build
 
 # ---- Create runtime image ----
-FROM debian:bookworm-slim AS runtime
+FROM node:24-slim AS runtime
 
 # Set the working directory
 WORKDIR /app
@@ -23,17 +25,14 @@ WORKDIR /app
 # Create a non-root user and group for security
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
-RUN apt-get update && apt-get install -y \
-    libssl3 \
-    ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+# Copy built application
+COPY --from=builder /usr/src/slowpoke/dist /app/dist
+COPY --from=builder /usr/src/slowpoke/node_modules /app/node_modules
+COPY --from=builder /usr/src/slowpoke/package.json /app/package.json
 
-COPY --from=builder /usr/src/slowpoke/target/release/slowpoke /app/slowpoke
-
-COPY --from=builder /usr/src/slowpoke/resources /app/resources
-
-RUN chmod +x /app/slowpoke
+# Change ownership to non-root user
+RUN chown -R appuser:appgroup /app
 
 USER appuser
 
-CMD ["./slowpoke"]
+CMD ["node", "dist/main.js"]
