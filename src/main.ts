@@ -51,31 +51,29 @@ const geminiClient = createGeminiClient({
 const geminiImagenClient = new GeminiImagenClient(geminiApiKey)
 const colorProvider = createColorProvider()
 
-const pingCommand = createPingCommand(colorProvider)
-const eightBallCommand = createEightBallCommand(colorProvider)
-const promptCommand = createPromptCommand(geminiClient, colorProvider)
-const chatCommand = createChatCommand(geminiClient)
-const tftiCommand = createTftiCommand(colorProvider)
-const imagineCommand = createImagineCommand(geminiClient, colorProvider)
-const rollCommand = createRollCommand(colorProvider)
+const slashCommandList: SlashCommand[] = [
+  createPingCommand(colorProvider),
+  createEightBallCommand(colorProvider),
+  createPromptCommand(geminiClient, colorProvider),
+  createChatCommand(geminiClient),
+  createTftiCommand(colorProvider),
+  createImagineCommand(geminiClient, colorProvider),
+  createRollCommand(colorProvider)
+]
 
-const slashCommands = new Map<string, SlashCommand>([
-  [pingCommand.command.name, pingCommand],
-  [eightBallCommand.command.name, eightBallCommand],
-  [promptCommand.command.name, promptCommand],
-  [chatCommand.command.name, chatCommand],
-  [tftiCommand.command.name, tftiCommand],
-  [imagineCommand.command.name, imagineCommand],
-  [rollCommand.command.name, rollCommand]
-])
+const slashCommands = new Map<string, SlashCommand>(
+  slashCommandList.map(command => [command.command.name, command])
+)
 
 const commandRegistrar = createCommandRegistrar(token, discordApplicationId)
 
-const remixCommand = createRemixCommand(geminiImagenClient)
+const prefixCommandList: PrefixCommand[] = [
+  createRemixCommand(geminiImagenClient)
+]
 
-const prefixCommands = new Map<string, PrefixCommand>([
-  [remixCommand.name, remixCommand]
-])
+const prefixCommands = new Map<string, PrefixCommand>(
+  prefixCommandList.map(command => [command.name, command])
+)
 
 const client = new Client({
   intents: [
@@ -123,14 +121,14 @@ client.on(Events.MessageCreate, async (message) => {
   try {
     prefixCommand.execute(message, args)
   } catch (error) {
-    logger.error({ error }, 'Error executing remix command')
+    logger.error({ error }, 'Error executing prefix command')
     await message.reply('There was an error while executing this command!')
   }
 })
 
 client.once(Events.ClientReady, async () => {
   logger.info('Client ready!')
-  await commandRegistrar.register([...slashCommands.values()])
+  await commandRegistrar.register(slashCommandList)
   startActivityRotation(client)
 })
 
