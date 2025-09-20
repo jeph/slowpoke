@@ -2,7 +2,6 @@ import { Client, Events, GatewayIntentBits, Partials } from 'discord.js'
 import dotenv from 'dotenv'
 import { GoogleGenAI } from '@google/genai'
 import { createGeminiClient } from './utils/gemini-client'
-import { GeminiImagenClient } from './utils/gemini-imagen-client'
 import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
 import { createCommandRegistrar } from './utils/command-registrar'
@@ -48,7 +47,6 @@ const geminiClient = createGeminiClient({
   googleGenAI,
   textGenerationModel: 'gemini-2.5-flash'
 })
-const geminiImagenClient = new GeminiImagenClient(geminiApiKey)
 const colorProvider = createColorProvider()
 
 const slashCommandList: SlashCommand[] = [

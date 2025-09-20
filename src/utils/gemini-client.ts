@@ -82,8 +82,11 @@ export const createGeminiClient = (options: GeminiClientOptions): GeminiClient =
       ]
 
       const response = await googleGenAI.models.generateContent({
-        model: 'gemini-2.5-flash-image-preview',
-        contents
+        model: 'gemini-2.0-flash-preview-image-generation',
+        contents,
+        config: {
+          responseModalities: [Modality.TEXT, Modality.IMAGE]
+        }
       })
 
       return parseImageResponse(response)
