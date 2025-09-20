@@ -1,9 +1,0 @@
-.git
-.gitignore
-target/
-.github
-.env
-.env.example
-rustfmt.toml
-docker-compose.yml
-docker-compose.example.yml

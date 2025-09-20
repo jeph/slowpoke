@@ -1,5 +1,7 @@
-/target
 .idea
+node_modules
 .DS_Store
 .env
+.claude
+dist
 docker-compose.yml
