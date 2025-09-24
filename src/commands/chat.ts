@@ -2,6 +2,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError, Mess
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
 
 const CHAT_SYSTEM_INSTRUCTION = `You are a Discord bot named slowpoke. You are named after
 the Pokémon Slowpoke. Respond to the Discord messages in the channel. You will be able to see up to
@@ -104,7 +105,14 @@ export const createChatCommand = (geminiClient: GeminiClient): SlashCommand => (
         systemInstruction: CHAT_SYSTEM_INSTRUCTION
       })
 
-      await interaction.editReply(response)
+      const chunkedResponse = await textSplitter.splitText(response)
+      for (const [index, chunk] of chunkedResponse.entries()) {
+        if (index === 0) {
+          await interaction.editReply(chunk)
+          continue
+        }
+        await interaction.followUp(chunk)
+      }
     } catch (error) {
       if (error instanceof DiscordAPIError && error.code === 50001) {
         return await interaction.editReply(
@@ -142,3 +150,14 @@ const trimEmptyLastMessage = (messages: Message[]) => {
   }
   return messages.slice(0, -1)
 }
+
+const textSplitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 1500,
+  chunkOverlap: 0,
+  separators: [
+    '\n\n',      // Paragraph breaks
+    '\n',        // Line breaks
+    ' ',         // Word boundaries
+    ''           // Character level (last resort)
+  ]
+})
