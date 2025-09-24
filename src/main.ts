@@ -15,6 +15,7 @@ import { createRemixCommand } from './commands/remix'
 import { createTftiCommand } from './commands/tfti'
 import { createRollCommand } from './commands/roll'
 import { PrefixCommand, SlashCommand } from './models/commands'
+import { createDeezNutsChimeIn } from './chime-ins/deez-nuts'
 
 // Load environment variables
 dotenv.config()
@@ -104,11 +105,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 })
 
+const deezNutsChimeIn = createDeezNutsChimeIn(geminiClient, { chimeInProbability: 0.01 })
+
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return
 
   const prefix = '!'
-  if (!message.content.startsWith(prefix)) return
+  if (!message.content.startsWith(prefix)) {
+    await deezNutsChimeIn.execute(message)
+    return
+  }
 
   const args = message.content.slice(prefix.length).trim().split(/ +/)
   const commandName = args.shift()?.toLowerCase()
