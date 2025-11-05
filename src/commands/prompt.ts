@@ -1,5 +1,5 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'

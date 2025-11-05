@@ -2,7 +2,7 @@ import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError, Mess
 import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
-import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter'
+import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 
 const CHAT_SYSTEM_INSTRUCTION = `You are a Discord bot named slowpoke. You are named after
 the Pokémon Slowpoke. Respond to the Discord messages in the channel. You will be able to see up to
