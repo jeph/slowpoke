@@ -1,5 +1,5 @@
 # ---- Build application ----
-FROM node:24-slim AS builder
+FROM node:25-slim AS builder
 
 WORKDIR /usr/src/slowpoke
 
@@ -17,7 +17,7 @@ COPY eslint.config.mjs ./
 RUN npm run build
 
 # ---- Create runtime image ----
-FROM node:24-slim AS runtime
+FROM node:25-slim AS runtime
 
 # Set the working directory
 WORKDIR /app
