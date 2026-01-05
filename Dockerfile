@@ -3,10 +3,12 @@ FROM node:25-slim AS builder
 
 WORKDIR /usr/src/slowpoke
 
-# Copy package files first for better caching
-COPY package.json package-lock.json ./
+# Install pnpm
+RUN npm install -g pnpm@10.27.0
 
-RUN npm ci
+# Copy package files first for better caching
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY ./src ./src
@@ -14,7 +16,8 @@ COPY tsconfig.json ./
 COPY eslint.config.mjs ./
 
 # Build the application
-RUN npm run build
+RUN pnpm run build
+RUN pnpm prune --prod
 
 # ---- Create runtime image ----
 FROM node:25-slim AS runtime

@@ -16,7 +16,7 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
 
 1. Install dependencies:
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. Create a `.env` file based on `.env.example`:
@@ -32,13 +32,13 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
 
 Run the bot in development mode:
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Build and run in production:
 ```bash
-npm run build
-npm start
+pnpm run build
+pnpm start
 ```
 
 ## Commands

@@ -5,3 +5,7 @@ node_modules
 .claude
 dist
 docker-compose.yml
+package-lock.json
+npm-debug.log*
+pnpm-debug.log*
+.pnpm-store
