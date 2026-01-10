@@ -4,7 +4,7 @@ FROM node:25-slim AS builder
 WORKDIR /usr/src/slowpoke
 
 # Install pnpm
-RUN npm install -g pnpm@10.27.0
+RUN npm install -g pnpm@10.28.0
 
 # Copy package files first for better caching
 COPY package.json pnpm-lock.yaml ./
