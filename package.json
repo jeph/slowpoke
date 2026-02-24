@@ -21,7 +21,7 @@
   "author": "Jeph",
   "license": "ISC",
   "dependencies": {
-    "@google/genai": "^1.41.0",
+    "@google/genai": "^1.42.0",
     "@langchain/textsplitters": "^1.0.1",
     "discord.js": "^14.25.1",
     "dotenv": "^17.3.1",
@@ -30,12 +30,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.2.3",
-    "eslint": "^10.0.0",
+    "@types/node": "^25.3.0",
+    "eslint": "^10.0.2",
     "globals": "^17.3.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.0"
+    "typescript-eslint": "^8.56.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
