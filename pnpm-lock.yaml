@@ -11,15 +11,21 @@ importers:
       '@google/genai':
         specifier: ^1.42.0
         version: 1.42.0
+      '@langchain/core':
+        specifier: ^1.1.42
+        version: 1.1.42
       '@langchain/textsplitters':
         specifier: ^1.0.1
-        version: 1.0.1(@langchain/core@1.1.8)
+        version: 1.0.1(@langchain/core@1.1.42)
       discord.js:
         specifier: ^14.25.1
         version: 14.25.1
       dotenv:
         specifier: ^17.3.1
         version: 17.3.1
+      langchainjs-codex-oauth:
+        specifier: ^0.1.7
+        version: 0.1.7(@langchain/core@1.1.42)
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -306,8 +312,8 @@ packages:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
 
-  '@langchain/core@1.1.8':
-    resolution: {integrity: sha512-kIUidOgc0ZdyXo4Ahn9Zas+OayqOfk4ZoKPi7XaDipNSWSApc2+QK5BVcjvwtzxstsNOrmXJiJWEN6WPF/MvAw==}
+  '@langchain/core@1.1.42':
+    resolution: {integrity: sha512-d0tN96BrwPMryYyWR9VfyAntSivn7EQrZCe5Kpxum93tcjTXbKKmKvItFec8AluQt88iTcmAJrahUZUNfzGwTA==}
     engines: {node: '>=20'}
 
   '@langchain/textsplitters@1.0.1':
@@ -364,6 +370,9 @@ packages:
   '@sapphire/snowflake@3.5.3':
     resolution: {integrity: sha512-jjmJywLAFoWeBi1W7994zZyiNWPIiqRRNAmSERxyg93xRGzNYvGjlZ0gR6x0F4gPRi2+0O6S71kOZYyr3cxaIQ==}
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@types/esrecurse@4.3.1':
     resolution: {integrity: sha512-xJBAbDifo5hpffDBuHl0Y8ywswbiAp/Wi7Y/GtAgSlZyIABppyurxVueOPE8LUQOxdlgi6Zqce7uoEpqNTeiUw==}
@@ -795,6 +804,13 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
+  langchainjs-codex-oauth@0.1.7:
+    resolution: {integrity: sha512-apuCGiAF12bK+N6/6Ooo8rmC8b/HiVLnAY5mwCWt81FZS2BUqa88pPR5fcOzL8y/ehBJ50fDNamQvChchuiLvQ==}
+    engines: {node: '>=20.0.0'}
+    hasBin: true
+    peerDependencies:
+      '@langchain/core': ^1.1.31
+
   langsmith@0.5.6:
     resolution: {integrity: sha512-T/RA2l2MsTYX0z1aW8rQ2hBQZEOuXV2v/6tkfG6R5EotJTKMpw1dERCbvP8ezOP8otyWfnNlQA88ZnMRsQ7CHA==}
     peerDependencies:
@@ -1083,6 +1099,7 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   web-streams-polyfill@3.3.3:
@@ -1127,6 +1144,9 @@ packages:
 
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
+  zod@4.4.1:
+    resolution: {integrity: sha512-a6ENMBBGZBsnlSebQ/eKCguSBeGKSf4O7BPnqVPmYGtpBYI7VSqoVqw+QcB7kPRjbqPwhYTpFbVj/RqNz/CT0Q==}
 
 snapshots:
 
@@ -1324,9 +1344,10 @@ snapshots:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
-  '@langchain/core@1.1.8':
+  '@langchain/core@1.1.42':
     dependencies:
       '@cfworker/json-schema': 4.1.1
+      '@standard-schema/spec': 1.1.0
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
@@ -1334,7 +1355,6 @@ snapshots:
       langsmith: 0.5.6
       mustache: 4.2.0
       p-queue: 6.6.2
-      uuid: 10.0.0
       zod: 4.3.6
     transitivePeerDependencies:
       - '@opentelemetry/api'
@@ -1342,9 +1362,9 @@ snapshots:
       - '@opentelemetry/sdk-trace-base'
       - openai
 
-  '@langchain/textsplitters@1.0.1(@langchain/core@1.1.8)':
+  '@langchain/textsplitters@1.0.1(@langchain/core@1.1.42)':
     dependencies:
-      '@langchain/core': 1.1.8
+      '@langchain/core': 1.1.42
       js-tiktoken: 1.0.21
 
   '@pinojs/redact@0.4.0': {}
@@ -1383,6 +1403,8 @@ snapshots:
       lodash: 4.17.23
 
   '@sapphire/snowflake@3.5.3': {}
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@types/esrecurse@4.3.1': {}
 
@@ -1872,6 +1894,11 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
+  langchainjs-codex-oauth@0.1.7(@langchain/core@1.1.42):
+    dependencies:
+      '@langchain/core': 1.1.42
+      zod: 4.4.1
+
   langsmith@0.5.6:
     dependencies:
       '@types/uuid': 10.0.0
@@ -2176,3 +2203,5 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   zod@4.3.6: {}
+
+  zod@4.4.1: {}
