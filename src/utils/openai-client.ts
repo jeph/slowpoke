@@ -1,21 +1,31 @@
 import { HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { ChatCodexOAuth } from 'langchainjs-codex-oauth'
 import { logger } from './logger'
-import { PromptOptions, TextGenerationClient } from './text-generation-client'
 
 const CODEX_MODEL = 'gpt-5.5'
+const REQUEST_TIMEOUT_MS = 5 * 60 * 1000
 
-export const createCodexTextClient = (): TextGenerationClient => {
+export interface OpenAIClient {
+  prompt(options: PromptOptions): Promise<string>;
+}
+
+export interface PromptOptions {
+  systemInstruction: string | undefined;
+  prompt: string;
+}
+
+export const createOpenAIClient = (): OpenAIClient => {
   const chatModel = new ChatCodexOAuth({
     model: CODEX_MODEL,
     reasoningEffort: 'medium',
-    serviceTier: 'priority'
+    serviceTier: 'priority',
+    timeout: REQUEST_TIMEOUT_MS
   })
 
   return {
     async prompt (options: PromptOptions): Promise<string> {
       const { prompt, systemInstruction } = options
-      logger.info({ prompt, systemInstruction, model: CODEX_MODEL, reasoningEffort: 'medium', serviceTier: 'priority' }, 'Sending prompt to Codex')
+      logger.info({ prompt, systemInstruction, model: CODEX_MODEL, reasoningEffort: 'medium', serviceTier: 'priority', timeoutMs: REQUEST_TIMEOUT_MS }, 'Sending prompt to OpenAI')
 
       const messages = systemInstruction
         ? [new SystemMessage(systemInstruction), new HumanMessage(prompt)]
@@ -25,11 +35,11 @@ export const createCodexTextClient = (): TextGenerationClient => {
       const text = response.text
 
       if (!text) {
-        logger.error({ response }, 'No text returned from Codex')
+        logger.error({ response }, 'No text returned from OpenAI')
         throw new Error('No text was returned from the LLM via inference')
       }
 
-      logger.info({ text }, 'Received response from Codex')
+      logger.info({ text }, 'Received response from OpenAI')
       return text
     }
   }

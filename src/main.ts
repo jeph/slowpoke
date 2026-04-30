@@ -2,7 +2,7 @@ import { Client, Events, GatewayIntentBits, Partials } from 'discord.js'
 import dotenv from 'dotenv'
 import { GoogleGenAI } from '@google/genai'
 import { createGeminiClient } from './utils/gemini-client'
-import { createCodexTextClient } from './utils/codex-text-client'
+import { createOpenAIClient } from './utils/openai-client'
 import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
 import { createCommandRegistrar } from './utils/command-registrar'
@@ -49,15 +49,15 @@ const geminiClient = createGeminiClient({
   googleGenAI,
   imageGenerationModel: 'gemini-2.0-flash-preview-image-generation'
 })
-logger.info({ model: 'gpt-5.5', reasoningEffort: 'medium', serviceTier: 'priority' }, 'Configuring Codex text client')
-const textGenerationClient = createCodexTextClient()
+logger.info({ model: 'gpt-5.5', reasoningEffort: 'medium', serviceTier: 'priority', timeoutMs: 5 * 60 * 1000 }, 'Configuring OpenAI client')
+const openAIClient = createOpenAIClient()
 const colorProvider = createColorProvider()
 
 const slashCommandList: SlashCommand[] = [
   createPingCommand(colorProvider),
   createEightBallCommand(colorProvider),
-  createPromptCommand(textGenerationClient, colorProvider),
-  createChatCommand(textGenerationClient),
+  createPromptCommand(openAIClient, colorProvider),
+  createChatCommand(openAIClient),
   createTftiCommand(colorProvider),
   createImagineCommand(geminiClient, colorProvider),
   createRollCommand(colorProvider)
@@ -107,7 +107,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 })
 
-const deezNutsChimeIn = createDeezNutsChimeIn(textGenerationClient, { chimeInProbability: 0.01 })
+const deezNutsChimeIn = createDeezNutsChimeIn(openAIClient, { chimeInProbability: 0.01 })
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return

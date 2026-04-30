@@ -3,9 +3,9 @@ import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
 import { ColorProvider } from '../utils/color-provider'
-import { TextGenerationClient } from '../utils/text-generation-client'
+import { OpenAIClient } from '../utils/openai-client'
 
-export const createPromptCommand = (textGenerationClient: TextGenerationClient, colorProvider: ColorProvider): SlashCommand => {
+export const createPromptCommand = (openAIClient: OpenAIClient, colorProvider: ColorProvider): SlashCommand => {
   return {
     command: new SlashCommandBuilder()
       .setName('prompt')
@@ -29,7 +29,7 @@ export const createPromptCommand = (textGenerationClient: TextGenerationClient, 
           return
         }
 
-        const response = await textGenerationClient.prompt({
+        const response = await openAIClient.prompt({
           prompt: promptText,
           systemInstruction: PROMPT_SYSTEM_INSTRUCTION
         })
