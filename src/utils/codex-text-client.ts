@@ -8,13 +8,14 @@ const CODEX_MODEL = 'gpt-5.5'
 export const createCodexTextClient = (): TextGenerationClient => {
   const chatModel = new ChatCodexOAuth({
     model: CODEX_MODEL,
+    reasoningEffort: 'medium',
     serviceTier: 'priority'
   })
 
   return {
     async prompt (options: PromptOptions): Promise<string> {
       const { prompt, systemInstruction } = options
-      logger.info({ prompt, systemInstruction, model: CODEX_MODEL, serviceTier: 'priority' }, 'Sending prompt to Codex')
+      logger.info({ prompt, systemInstruction, model: CODEX_MODEL, reasoningEffort: 'medium', serviceTier: 'priority' }, 'Sending prompt to Codex')
 
       const messages = systemInstruction
         ? [new SystemMessage(systemInstruction), new HumanMessage(prompt)]
