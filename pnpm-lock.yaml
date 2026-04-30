@@ -24,8 +24,8 @@ importers:
         specifier: ^17.3.1
         version: 17.3.1
       langchainjs-codex-oauth:
-        specifier: ^0.1.7
-        version: 0.1.7(@langchain/core@1.1.42)
+        specifier: ^0.1.8
+        version: 0.1.8(@langchain/core@1.1.42)
       pino:
         specifier: ^10.3.1
         version: 10.3.1
@@ -804,8 +804,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  langchainjs-codex-oauth@0.1.7:
-    resolution: {integrity: sha512-apuCGiAF12bK+N6/6Ooo8rmC8b/HiVLnAY5mwCWt81FZS2BUqa88pPR5fcOzL8y/ehBJ50fDNamQvChchuiLvQ==}
+  langchainjs-codex-oauth@0.1.8:
+    resolution: {integrity: sha512-k/EpdwlIred7rxivy3eViy2Cos7FWWE8//V50E/Iu5eDnWBTd3frWgupycjQl7d63le1OMdsa0DE+0PV9+r+rA==}
     engines: {node: '>=20.0.0'}
     hasBin: true
     peerDependencies:
@@ -1894,7 +1894,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  langchainjs-codex-oauth@0.1.7(@langchain/core@1.1.42):
+  langchainjs-codex-oauth@0.1.8(@langchain/core@1.1.42):
     dependencies:
       '@langchain/core': 1.1.42
       zod: 4.4.1
