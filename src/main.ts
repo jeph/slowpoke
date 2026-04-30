@@ -49,9 +49,8 @@ const geminiClient = createGeminiClient({
   googleGenAI,
   imageGenerationModel: 'gemini-2.0-flash-preview-image-generation'
 })
-const codexModel = process.env.CODEX_MODEL ?? 'gpt-5.5'
-logger.info({ model: codexModel, serviceTier: 'priority' }, 'Configuring Codex text client')
-const textGenerationClient = createCodexTextClient({ model: codexModel })
+logger.info({ model: 'gpt-5.5', serviceTier: 'priority' }, 'Configuring Codex text client')
+const textGenerationClient = createCodexTextClient()
 const colorProvider = createColorProvider()
 
 const slashCommandList: SlashCommand[] = [

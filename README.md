@@ -28,7 +28,6 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
    - `DISCORD_TOKEN`: Your Discord bot token
    - `GEMINI_API_KEY`: Your Google Gemini API key for image commands
    - `DISCORD_APPLICATION_ID`: Your Discord application ID
-   - `CODEX_MODEL`: Optional Codex model name, defaults to `gpt-5.5`
 
 4. Authenticate Codex text generation once on the machine running the bot:
    ```bash
@@ -48,7 +47,6 @@ services:
     image: ghcr.io/jeph/slowpoke:latest
     environment:
       LANGCHAINJS_CODEX_OAUTH_HOME: /app/.langchainjs-codex-oauth
-      CODEX_MODEL: gpt-5.5
     volumes:
       - slowpoke-codex-oauth:/app/.langchainjs-codex-oauth
 

@@ -3,21 +3,18 @@ import { ChatCodexOAuth } from 'langchainjs-codex-oauth'
 import { logger } from './logger'
 import { PromptOptions, TextGenerationClient } from './text-generation-client'
 
-export interface CodexTextClientOptions {
-  model: string;
-}
+const CODEX_MODEL = 'gpt-5.5'
 
-export const createCodexTextClient = (options: CodexTextClientOptions): TextGenerationClient => {
-  const { model } = options
+export const createCodexTextClient = (): TextGenerationClient => {
   const chatModel = new ChatCodexOAuth({
-    model,
+    model: CODEX_MODEL,
     serviceTier: 'priority'
   })
 
   return {
     async prompt (options: PromptOptions): Promise<string> {
       const { prompt, systemInstruction } = options
-      logger.info({ prompt, systemInstruction, model, serviceTier: 'priority' }, 'Sending prompt to Codex')
+      logger.info({ prompt, systemInstruction, model: CODEX_MODEL, serviceTier: 'priority' }, 'Sending prompt to Codex')
 
       const messages = systemInstruction
         ? [new SystemMessage(systemInstruction), new HumanMessage(prompt)]
