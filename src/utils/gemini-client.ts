@@ -1,21 +1,13 @@
 import { GoogleGenAI, Modality, GenerateContentResponse } from '@google/genai'
-import { logger } from './logger'
 
 export interface GeminiClient {
-  prompt(prompt: PromptOptions): Promise<string>;
   generateImage(options: GenerateImageOptions): Promise<Buffer>;
   editImage(options: EditImageOptions): Promise<Buffer>;
 }
 
 export interface GeminiClientOptions {
   googleGenAI: GoogleGenAI;
-  textGenerationModel: string;
   imageGenerationModel: string;
-}
-
-export interface PromptOptions {
-  systemInstruction: string | undefined;
-  prompt: string;
 }
 
 export interface GenerateImageOptions {
@@ -29,30 +21,8 @@ export interface EditImageOptions {
 }
 
 export const createGeminiClient = (options: GeminiClientOptions): GeminiClient => {
-  const { googleGenAI, textGenerationModel, imageGenerationModel } = options
+  const { googleGenAI, imageGenerationModel } = options
   return {
-    async prompt (options: PromptOptions): Promise<string> {
-      const { prompt, systemInstruction } = options
-      logger.info({ prompt, systemInstruction }, 'Sending prompt to Gemini')
-      const response = await googleGenAI.models.generateContent(
-        {
-          model: textGenerationModel,
-          contents: prompt,
-          config: {
-            systemInstruction
-          }
-        }
-      )
-
-      if (!response.text) {
-        logger.error({ response }, 'No text returned from Gemini')
-        throw new Error('No text was returned from the LLM via inference')
-      }
-
-      logger.info({ text: response.text }, 'Received response from Gemini')
-      return response.text
-    },
-
     async generateImage (options: GenerateImageOptions): Promise<Buffer> {
       const { prompt } = options
       const response = await googleGenAI.models.generateContent(

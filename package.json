@@ -9,6 +9,9 @@
     "start": "node dist/main.js",
     "dev": "tsx src/main.ts",
     "clean": "rm -rf dist",
+    "codex:auth:login": "langchainjs-codex-oauth auth login",
+    "codex:auth:logout": "langchainjs-codex-oauth auth logout",
+    "codex:auth:status": "langchainjs-codex-oauth auth status",
     "prebuild": "pnpm run clean && pnpm run lint",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
@@ -22,9 +25,11 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^1.42.0",
+    "@langchain/core": "^1.1.42",
     "@langchain/textsplitters": "^1.0.1",
     "discord.js": "^14.25.1",
     "dotenv": "^17.3.1",
+    "langchainjs-codex-oauth": "^0.1.7",
     "pino": "^10.3.1",
     "pino-pretty": "^13.1.3"
   },

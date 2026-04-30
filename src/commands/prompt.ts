@@ -1,11 +1,11 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
-import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
 import { ColorProvider } from '../utils/color-provider'
+import { TextGenerationClient } from '../utils/text-generation-client'
 
-export const createPromptCommand = (geminiClient: GeminiClient, colorProvider: ColorProvider): SlashCommand => {
+export const createPromptCommand = (textGenerationClient: TextGenerationClient, colorProvider: ColorProvider): SlashCommand => {
   return {
     command: new SlashCommandBuilder()
       .setName('prompt')
@@ -29,7 +29,7 @@ export const createPromptCommand = (geminiClient: GeminiClient, colorProvider: C
           return
         }
 
-        const response = await geminiClient.prompt({
+        const response = await textGenerationClient.prompt({
           prompt: promptText,
           systemInstruction: PROMPT_SYSTEM_INSTRUCTION
         })

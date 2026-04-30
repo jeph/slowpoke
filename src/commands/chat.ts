@@ -1,8 +1,8 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError, Message, Guild } from 'discord.js'
-import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
+import { TextGenerationClient } from '../utils/text-generation-client'
 
 const CHAT_SYSTEM_INSTRUCTION = `You are a Discord bot named slowpoke. You are named after
 the Pokémon Slowpoke. Respond to the Discord messages in the channel. You will be able to see up to
@@ -70,7 +70,7 @@ literally), here are some general guidelines on how to respond:
 
 `
 
-export const createChatCommand = (geminiClient: GeminiClient): SlashCommand => ({
+export const createChatCommand = (textGenerationClient: TextGenerationClient): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('chat')
     .setDescription('Chat with slowpoke'),
@@ -100,7 +100,7 @@ export const createChatCommand = (geminiClient: GeminiClient): SlashCommand => (
       }).join('\n')
       logger.info({ formattedMessages }, 'Formatted recent messages for LLM')
 
-      const response = await geminiClient.prompt({
+      const response = await textGenerationClient.prompt({
         prompt: formattedMessages,
         systemInstruction: CHAT_SYSTEM_INSTRUCTION
       })
