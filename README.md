@@ -4,7 +4,7 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
 
 ## Features
 
-- **Chat**: Engage in conversations with the bot using Google's Gemini AI
+- **Chat**: Engage in conversations with the bot using Codex through LangChainJS
 - **Prompt**: Ask questions and get AI-powered responses
 - **Image Generation**: Create images from text prompts using Gemini Imagen
 - **Image Remix**: Transform existing images with AI
@@ -26,7 +26,49 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
 
 3. Fill in your environment variables:
    - `DISCORD_TOKEN`: Your Discord bot token
-   - `GEMINI_API_KEY`: Your Google Gemini API key
+   - `GEMINI_API_KEY`: Your Google Gemini API key for image commands
+   - `DISCORD_APPLICATION_ID`: Your Discord application ID
+
+4. Authenticate Codex text generation once on the machine running the bot:
+   ```bash
+   pnpm run codex:auth:login
+   pnpm run codex:auth:status
+   ```
+
+   Codex OAuth credentials are stored by `langchainjs-codex-oauth` outside the app source tree by default. Treat the auth file as a secret.
+
+## Docker Auth
+
+The public Docker image does not include Codex OAuth credentials. Mount a persistent volume at `/app/.langchainjs-codex-oauth` and authenticate once against that volume.
+
+```yaml
+services:
+  slowpoke:
+    image: ghcr.io/jeph/slowpoke:latest
+    environment:
+      LANGCHAINJS_CODEX_OAUTH_HOME: /app/.langchainjs-codex-oauth
+    volumes:
+      - slowpoke-codex-oauth:/app/.langchainjs-codex-oauth
+
+volumes:
+  slowpoke-codex-oauth:
+    name: slowpoke-codex-oauth
+```
+
+Bootstrap auth with the same image and volume:
+
+```bash
+docker compose run --rm -it slowpoke npm run codex:auth:login -- --manual
+docker compose run --rm slowpoke npm run codex:auth:status
+```
+
+`npx` is available in the container too:
+
+```bash
+docker compose run --rm -it slowpoke npx langchainjs-codex-oauth auth status
+```
+
+Named volumes persist across image pulls and container recreation. Do not run `docker compose down -v`, remove the volume in Portainer, or prune volumes unless you intend to delete the stored OAuth credentials.
 
 ## Development
 

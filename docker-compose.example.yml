@@ -9,3 +9,10 @@ services:
       DISCORD_TOKEN: "your_actual_discord_token_here"
       GEMINI_API_KEY: "your_actual_gemini_api_key_here"
       DISCORD_APPLICATION_ID: "your_actual_discord_application_id_here"
+      LANGCHAINJS_CODEX_OAUTH_HOME: "/app/.langchainjs-codex-oauth"
+    volumes:
+      - slowpoke-codex-oauth:/app/.langchainjs-codex-oauth
+
+volumes:
+  slowpoke-codex-oauth:
+    name: slowpoke-codex-oauth

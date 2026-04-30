@@ -1,7 +1,7 @@
 import { Message } from 'discord.js'
 import { ChimeIn } from '../models/chime-in'
-import { GeminiClient } from '../utils/gemini-client'
 import { logger } from '../utils/logger'
+import { TextGenerationClient } from '../utils/text-generation-client'
 
 export interface DeezNutsConfig {
   chimeInProbability: number
@@ -29,7 +29,7 @@ const SYSTEM_INSTRUCTION = 'You are a creative Discord bot that makes "deez nuts
     'Response: No good joke.\n\n' +
     'When returning the response, do not include any additional text or formatting. Just return the joke itself.'
 
-export const createDeezNutsChimeIn = (geminiClient: GeminiClient, config: DeezNutsConfig): ChimeIn => ({
+export const createDeezNutsChimeIn = (textGenerationClient: TextGenerationClient, config: DeezNutsConfig): ChimeIn => ({
   name: 'deez-nuts',
 
   async execute (message: Message): Promise<boolean> {
@@ -39,7 +39,7 @@ export const createDeezNutsChimeIn = (geminiClient: GeminiClient, config: DeezNu
       }
       logger.info('Starting deez nuts chime-in')
 
-      const response = await geminiClient.prompt({
+      const response = await textGenerationClient.prompt({
         systemInstruction: SYSTEM_INSTRUCTION,
         prompt: `User message: "${message.content}"`
       })
