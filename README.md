@@ -5,7 +5,8 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
 ## Features
 
 - **Chat**: Engage in conversations with the bot using Codex through LangChainJS
-- **Prompt**: Ask questions and get AI-powered responses
+- **Prompt**: Ask questions and get AI-powered responses, including web search when useful
+- **Web Tools**: Search the web with Brave Search and read public webpages through LangChain
 - **Image Generation**: Create images from text prompts using Gemini Imagen
 - **Image Remix**: Transform existing images with AI
 - **8-Ball**: Ask the magic 8-ball for answers
@@ -25,9 +26,10 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
    ```
 
 3. Fill in your environment variables:
-   - `DISCORD_TOKEN`: Your Discord bot token
-   - `GEMINI_API_KEY`: Your Google Gemini API key for image commands
-   - `DISCORD_APPLICATION_ID`: Your Discord application ID
+    - `DISCORD_TOKEN`: Your Discord bot token
+    - `GEMINI_API_KEY`: Your Google Gemini API key for image commands
+    - `DISCORD_APPLICATION_ID`: Your Discord application ID
+    - `BRAVE_SEARCH_API_KEY`: Your Brave Search API key for `/prompt` and `/chat` web tools
 
 4. Authenticate Codex text generation once on the machine running the bot:
    ```bash
@@ -88,8 +90,8 @@ pnpm start
 ### Slash Commands
 - `/ping` - Test the bot's latency
 - `/8ball [question]` - Ask the magic 8-ball
-- `/prompt <text>` - Ask the AI a question
-- `/chat` - Have the bot participate in the conversation
+- `/prompt <text>` - Ask the AI a question, with automatic web search/page reading when useful
+- `/chat` - Have the bot participate in the conversation, with automatic web search/page reading when useful
 - `/tfti` - Thanks for the invite, asshole
 - `/imagine <prompt>` - Generate an image from text
 - `/remix <instructions>` - Remix an image (reply to a message with an image)

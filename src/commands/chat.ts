@@ -1,7 +1,8 @@
-import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError, Message, Guild } from 'discord.js'
+import { SlashCommandBuilder, ChatInputCommandInteraction, DiscordAPIError, Message, Guild, MessageFlags } from 'discord.js'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
+import { StructuredToolInterface } from '@langchain/core/tools'
 import { OpenAIClient } from '../utils/openai-client'
 
 const CHAT_SYSTEM_INSTRUCTION = `You are a Discord bot named slowpoke. You are named after
@@ -67,10 +68,12 @@ literally), here are some general guidelines on how to respond:
 - Be a bit edgy. Not every message needs to be positive, friendly, or politically correct.
 - Find opportunities to roast and troll people.
 - Use emojis, but don't overuse them. Not every message needs an emoji.
+- Use web tools when the conversation needs current information, external sources, or a webpage URL.
+- If you use web information, include source URLs when helpful.
 
 `
 
-export const createChatCommand = (openAIClient: OpenAIClient): SlashCommand => ({
+export const createChatCommand = (openAIClient: OpenAIClient, webTools: StructuredToolInterface[]): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('chat')
     .setDescription('Chat with slowpoke'),
@@ -102,23 +105,31 @@ export const createChatCommand = (openAIClient: OpenAIClient): SlashCommand => (
 
       const response = await openAIClient.prompt({
         prompt: formattedMessages,
-        systemInstruction: CHAT_SYSTEM_INSTRUCTION
+        systemInstruction: CHAT_SYSTEM_INSTRUCTION,
+        tools: webTools
       })
 
       const chunkedResponse = await textSplitter.splitText(response)
       for (const [index, chunk] of chunkedResponse.entries()) {
         if (index === 0) {
-          await interaction.editReply(chunk)
+          await interaction.editReply({
+            content: chunk,
+            flags: MessageFlags.SuppressEmbeds
+          })
           continue
         }
-        await interaction.followUp(chunk)
+        await interaction.followUp({
+          content: chunk,
+          flags: MessageFlags.SuppressEmbeds
+        })
       }
     } catch (error) {
       if (error instanceof DiscordAPIError && error.code === 50001) {
-        return await interaction.editReply(
+        await interaction.editReply(
           "Ah! I'm not able to see the messages in this chat. You might need to add me to the chat " +
             'or channel before I can chat with you.'
         )
+        return
       }
       logger.error({ error }, 'Error in chat command')
       await interaction.editReply('Sorry, there was an error processing the chat request.')

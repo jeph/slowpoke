@@ -7,6 +7,7 @@ import { startActivityRotation } from './utils/activity-manager'
 import { logger } from './utils/logger'
 import { createCommandRegistrar } from './utils/command-registrar'
 import { createColorProvider } from './utils/color-provider'
+import { createWebTools } from './utils/web-tools'
 import { createChatCommand } from './commands/chat'
 import { createEightBallCommand } from './commands/eight-ball'
 import { createImagineCommand } from './commands/imagine'
@@ -44,6 +45,13 @@ if (!geminiApiKey) {
 }
 logger.info('Successfully got gemini api key from environment')
 
+logger.info('Getting Brave Search API key from environment')
+const braveSearchApiKey = process.env.BRAVE_SEARCH_API_KEY
+if (!braveSearchApiKey) {
+  throw new Error('BRAVE_SEARCH_API_KEY was not found')
+}
+logger.info('Successfully got Brave Search API key from environment')
+
 const googleGenAI = new GoogleGenAI({ apiKey: geminiApiKey })
 const geminiClient = createGeminiClient({
   googleGenAI,
@@ -52,12 +60,13 @@ const geminiClient = createGeminiClient({
 logger.info({ model: 'gpt-5.5', reasoningEffort: 'medium', serviceTier: 'priority', timeoutMs: 5 * 60 * 1000 }, 'Configuring OpenAI client')
 const openAIClient = createOpenAIClient()
 const colorProvider = createColorProvider()
+const webTools = createWebTools(braveSearchApiKey)
 
 const slashCommandList: SlashCommand[] = [
   createPingCommand(colorProvider),
   createEightBallCommand(colorProvider),
-  createPromptCommand(openAIClient, colorProvider),
-  createChatCommand(openAIClient),
+  createPromptCommand(openAIClient, colorProvider, webTools),
+  createChatCommand(openAIClient, webTools),
   createTftiCommand(colorProvider),
   createImagineCommand(geminiClient, colorProvider),
   createRollCommand(colorProvider)
@@ -94,7 +103,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!command) return
 
   try {
-    command.execute(interaction)
+    await command.execute(interaction)
   } catch (error) {
     logger.error({ error, commandName: interaction.commandName }, 'Error executing slash command')
     const errorMessage = 'There was an error while executing this command!'
@@ -126,7 +135,7 @@ client.on(Events.MessageCreate, async (message) => {
   if (!prefixCommand) return
 
   try {
-    prefixCommand.execute(message)
+    await prefixCommand.execute(message)
   } catch (error) {
     logger.error({ error }, 'Error executing prefix command')
     await message.reply('There was an error while executing this command!')

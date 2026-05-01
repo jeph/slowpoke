@@ -2,10 +2,10 @@ import { ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandOptionsOn
 
 export interface SlashCommand {
   command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder,
-  execute: (interaction: ChatInputCommandInteraction) => void,
+  execute: (interaction: ChatInputCommandInteraction) => void | Promise<void>,
 }
 
 export interface PrefixCommand {
   name: string;
-  execute: (message: Message) => void
+  execute: (message: Message) => void | Promise<void>
 }

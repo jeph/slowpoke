@@ -1,11 +1,12 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder } from 'discord.js'
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters'
+import { StructuredToolInterface } from '@langchain/core/tools'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
 import { ColorProvider } from '../utils/color-provider'
 import { OpenAIClient } from '../utils/openai-client'
 
-export const createPromptCommand = (openAIClient: OpenAIClient, colorProvider: ColorProvider): SlashCommand => {
+export const createPromptCommand = (openAIClient: OpenAIClient, colorProvider: ColorProvider, webTools: StructuredToolInterface[]): SlashCommand => {
   return {
     command: new SlashCommandBuilder()
       .setName('prompt')
@@ -31,7 +32,8 @@ export const createPromptCommand = (openAIClient: OpenAIClient, colorProvider: C
 
         const response = await openAIClient.prompt({
           prompt: promptText,
-          systemInstruction: PROMPT_SYSTEM_INSTRUCTION
+          systemInstruction: PROMPT_SYSTEM_INSTRUCTION,
+          tools: webTools
         })
 
         const promptHeader = `***${promptText}***\n\n`
@@ -64,7 +66,8 @@ export const createPromptCommand = (openAIClient: OpenAIClient, colorProvider: C
 
 const PROMPT_SYSTEM_INSTRUCTION = `Return your response in markdown. Give as complete of an
 answer as possible. Assume whoever you're talking to will not be able to respond back so do not ask
-for follow-ups. Do not hallucinate.`
+for follow-ups. Do not hallucinate. Use web tools when the question needs current information,
+external sources, or a webpage URL. Cite source URLs when you use web information.`
 
 const textSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 4096,
