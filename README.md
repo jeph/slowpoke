@@ -6,7 +6,7 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
 
 - **Chat**: Engage in conversations with the bot using Codex through LangChainJS
 - **Prompt**: Ask questions and get AI-powered responses, including web search when useful
-- **Web Tools**: Search the web with Brave Search and read public webpages through LangChain
+- **Web Tools**: Search the web with Brave Search
 - **Image Generation**: Create images from text prompts using Gemini Imagen
 - **Image Remix**: Transform existing images with AI
 - **8-Ball**: Ask the magic 8-ball for answers
@@ -90,8 +90,8 @@ pnpm start
 ### Slash Commands
 - `/ping` - Test the bot's latency
 - `/8ball [question]` - Ask the magic 8-ball
-- `/prompt <text>` - Ask the AI a question, with automatic web search/page reading when useful
-- `/chat` - Have the bot participate in the conversation, with automatic web search/page reading when useful
+- `/prompt <text>` - Ask the AI a question, with automatic web search when useful
+- `/chat` - Have the bot participate in the conversation, with automatic web search when useful
 - `/tfti` - Thanks for the invite, asshole
 - `/imagine <prompt>` - Generate an image from text
 - `/remix <instructions>` - Remix an image (reply to a message with an image)

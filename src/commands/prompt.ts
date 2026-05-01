@@ -66,8 +66,8 @@ export const createPromptCommand = (openAIClient: OpenAIClient, colorProvider: C
 
 const PROMPT_SYSTEM_INSTRUCTION = `Return your response in markdown. Give as complete of an
 answer as possible. Assume whoever you're talking to will not be able to respond back so do not ask
-for follow-ups. Do not hallucinate. Use web tools when the question needs current information,
-external sources, or a webpage URL. Cite source URLs when you use web information.`
+for follow-ups. Do not hallucinate. Use web tools when the question needs current information or
+external sources. Cite source URLs when you use web information.`
 
 const textSplitter = new RecursiveCharacterTextSplitter({
   chunkSize: 4096,
