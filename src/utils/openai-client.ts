@@ -5,6 +5,7 @@ import { ChatCodexOAuth } from 'langchainjs-codex-oauth'
 import { logger } from './logger'
 
 const CODEX_MODEL = 'gpt-5.5'
+const CODEX_SERVICE_TIER = 'default'
 const REQUEST_TIMEOUT_MS = 5 * 60 * 1000
 const MAX_TOOL_STEPS = 25
 
@@ -22,14 +23,14 @@ export const createOpenAIClient = (): OpenAIClient => {
   const chatModel = new ChatCodexOAuth({
     model: CODEX_MODEL,
     reasoningEffort: 'medium',
-    serviceTier: 'priority',
+    serviceTier: CODEX_SERVICE_TIER,
     timeout: REQUEST_TIMEOUT_MS
   })
 
   return {
     async prompt (options: PromptOptions): Promise<string> {
       const { prompt, systemInstruction, tools = [] } = options
-      logger.info({ promptLength: prompt.length, hasSystemInstruction: !!systemInstruction, toolNames: tools.map(tool => tool.name), model: CODEX_MODEL, reasoningEffort: 'medium', serviceTier: 'priority', timeoutMs: REQUEST_TIMEOUT_MS }, 'Sending prompt to OpenAI')
+      logger.info({ promptLength: prompt.length, hasSystemInstruction: !!systemInstruction, toolNames: tools.map(tool => tool.name), model: CODEX_MODEL, reasoningEffort: 'medium', serviceTier: CODEX_SERVICE_TIER, timeoutMs: REQUEST_TIMEOUT_MS }, 'Sending prompt to OpenAI')
 
       const text = tools.length > 0
         ? await invokeAgentWithTools(chatModel, prompt, systemInstruction, tools)

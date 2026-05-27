@@ -57,7 +57,7 @@ const geminiClient = createGeminiClient({
   googleGenAI,
   imageGenerationModel: 'gemini-2.0-flash-preview-image-generation'
 })
-logger.info({ model: 'gpt-5.5', reasoningEffort: 'medium', serviceTier: 'priority', timeoutMs: 5 * 60 * 1000 }, 'Configuring OpenAI client')
+logger.info({ model: 'gpt-5.5', reasoningEffort: 'medium', serviceTier: 'default', timeoutMs: 5 * 60 * 1000 }, 'Configuring OpenAI client')
 const openAIClient = createOpenAIClient()
 const colorProvider = createColorProvider()
 const webTools = createWebTools(braveSearchApiKey)
