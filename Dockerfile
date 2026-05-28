@@ -6,8 +6,10 @@ WORKDIR /usr/src/slowpoke
 # Install pnpm
 RUN npm install -g pnpm@10.28.0
 
-# Copy package files first for better caching
-COPY package.json pnpm-lock.yaml ./
+# Copy package files and pnpm workspace config first for better caching.
+# pnpm-workspace.yaml contains the override/build-script policy that must
+# match pnpm-lock.yaml for frozen installs.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
