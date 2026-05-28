@@ -1,0 +1,17 @@
+packages:
+  - .
+
+# Narrow security overrides for GHSA-w5hq-g745-h8pq until LangGraph
+# declares a patched uuid range upstream.
+overrides:
+  '@langchain/langgraph>uuid': '11.1.1'
+  '@langchain/langgraph-checkpoint>uuid': '11.1.1'
+
+# Keep pnpm lifecycle script policy explicit instead of approving
+# newly introduced build scripts automatically.
+onlyBuiltDependencies:
+  - esbuild
+  - protobufjs
+
+ignoredBuiltDependencies:
+  - '@google/genai'
