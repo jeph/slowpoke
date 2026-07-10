@@ -89,19 +89,19 @@ export const createChatCommand = (openAIClient: OpenAIClient, webTools: Structur
           [...messages.values()]
             .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()))
         : []
-      logger.info({ chronologicalMessages }, 'Fetched recent messages for chat command')
+      logger.info({ messageCount: chronologicalMessages.length }, 'Fetched recent messages for chat command')
 
       const displayNames = interaction.guild
         ? await getDisplayNamesInMessages(chronologicalMessages, interaction.guild)
         : new Map()
-      logger.info({ displayNames, isGuild: !!interaction.guild }, 'Fetched display names for recent messages')
+      logger.info({ displayNameCount: displayNames.size, isGuild: !!interaction.guild }, 'Fetched display names for recent messages')
 
       const formattedMessages = chronologicalMessages.map(message => {
         const name = displayNames.get(message.author.id) || message.author.globalName || message.author.username
         const time = message.createdAt.toISOString()
         return `[name: ${name}][time: ${time}][isBot: ${message.author.bot}]: ${message.content}`
       }).join('\n')
-      logger.info({ formattedMessages }, 'Formatted recent messages for LLM')
+      logger.info({ formattedMessageLength: formattedMessages.length }, 'Formatted recent messages for LLM')
 
       const response = await openAIClient.prompt({
         prompt: formattedMessages,

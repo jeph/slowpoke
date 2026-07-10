@@ -1,104 +1,108 @@
 # slowpoke-typescript
 
-slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pokémon Slowpoke. This bot provides various commands including AI-powered conversations, image generation, and fun utilities.
+slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pokémon Slowpoke.
 
 ## Features
 
-- **Chat**: Engage in conversations with the bot using Codex through LangChainJS
-- **Prompt**: Ask questions and get AI-powered responses, including web search when useful
-- **Web Tools**: Search the web with Brave Search
-- **Image Generation**: Create images from text prompts using Gemini Imagen
-- **Image Remix**: Transform existing images with AI
-- **8-Ball**: Ask the magic 8-ball for answers
-- **Ping**: Test the bot's latency
-- **TFTI**: A fun "thanks for the invite" command with escalating responses
+- **Chat and Prompt**: GPT-5.6 text generation through codex-lb and LangChainJS
+- **Web Tools**: Anonymous Parallel Search MCP tools for current web information and source extraction
+- **Image Generation**: GPT Image 2 text-to-image generation through codex-lb
+- **Image Remix**: GPT Image 2 edits of Discord-hosted PNG, JPEG, and WebP images
+- **Utilities**: Ping, 8-ball, dice rolling, and TFTI commands
+
+The deployment is intentionally fixed to:
+
+- codex-lb: `https://codex.jeph.io/v1`
+- text model: `gpt-5.6-terra`
+- image model: `gpt-image-2`
+- Parallel Search MCP: `https://search.parallel.ai/mcp`
 
 ## Setup
 
 1. Install dependencies:
+
    ```bash
    pnpm install
    ```
 
 2. Create a `.env` file based on `.env.example`:
+
    ```bash
    cp .env.example .env
    ```
 
-3. Fill in your environment variables:
-    - `DISCORD_TOKEN`: Your Discord bot token
-    - `GEMINI_API_KEY`: Your Google Gemini API key for image commands
-    - `DISCORD_APPLICATION_ID`: Your Discord application ID
-    - `BRAVE_SEARCH_API_KEY`: Your Brave Search API key for `/prompt` and `/chat` web tools
+3. Configure the required runtime secrets:
 
-4. Authenticate Codex text generation once on the machine running the bot:
-   ```bash
-   pnpm run codex:auth:login
-   pnpm run codex:auth:status
-   ```
+   - `DISCORD_TOKEN`: Discord bot token
+   - `DISCORD_APPLICATION_ID`: Discord application ID
+   - `CODEX_LB_API_KEY`: codex-lb key allowed to use `gpt-5.6-terra` and `gpt-image-2`
 
-   Codex OAuth credentials are stored by `langchainjs-codex-oauth` outside the app source tree by default. Treat the auth file as a secret.
+The codex-lb key is sent only to `https://codex.jeph.io/v1`. Do not commit `.env` or put runtime secrets in a Docker image.
 
-## Docker Auth
-
-The public Docker image does not include Codex OAuth credentials. Mount a persistent volume at `/app/.langchainjs-codex-oauth` and authenticate once against that volume.
-
-```yaml
-services:
-  slowpoke:
-    image: ghcr.io/jeph/slowpoke:latest
-    environment:
-      LANGCHAINJS_CODEX_OAUTH_HOME: /app/.langchainjs-codex-oauth
-    volumes:
-      - slowpoke-codex-oauth:/app/.langchainjs-codex-oauth
-
-volumes:
-  slowpoke-codex-oauth:
-    name: slowpoke-codex-oauth
-```
-
-Bootstrap auth with the same image and volume:
-
-```bash
-docker compose run --rm -it slowpoke npm run codex:auth:login -- --manual
-docker compose run --rm slowpoke npm run codex:auth:status
-```
-
-`npx` is available in the container too:
-
-```bash
-docker compose run --rm -it slowpoke npx langchainjs-codex-oauth auth status
-```
-
-Named volumes persist across image pulls and container recreation. Do not run `docker compose down -v`, remove the volume in Portainer, or prune volumes unless you intend to delete the stored OAuth credentials.
+Parallel's Search MCP is used anonymously and does not require an API key. Anonymous access has lower rate limits than authenticated Parallel plans. If the MCP cannot be reached during startup, slowpoke starts without web tools; text and image features remain available until the next restart.
 
 ## Development
 
-Run the bot in development mode:
+Run offline tests:
+
 ```bash
-pnpm run dev
+pnpm test
+pnpm typecheck
+```
+
+Run the bot in development mode:
+
+```bash
+pnpm dev
 ```
 
 Build and run in production:
+
 ```bash
-pnpm run build
+pnpm build
 pnpm start
+```
+
+Live provider smoke tests are manual and never run in CI. They use the local `.env`; image tests can incur provider charges and require a second explicit guard:
+
+```bash
+RUN_LIVE_AI_SMOKE_TESTS=1 pnpm smoke:live
+RUN_LIVE_AI_SMOKE_TESTS=1 RUN_LIVE_IMAGE_SMOKE_TESTS=1 pnpm smoke:live -- --images
+```
+
+## Docker
+
+Use runtime environment injection rather than build arguments or image-level secrets. See `docker-compose.example.yml` for a minimal example:
+
+```bash
+cp docker-compose.example.yml docker-compose.yml
+docker compose up -d
 ```
 
 ## Commands
 
-### Slash Commands
+### Slash commands
+
 - `/ping` - Test the bot's latency
 - `/8ball [question]` - Ask the magic 8-ball
-- `/prompt <text>` - Ask the AI a question, with automatic web search when useful
-- `/chat` - Have the bot participate in the conversation, with automatic web search when useful
-- `/tfti` - Thanks for the invite, asshole
+- `/prompt <text>` - Ask the AI a question, with web search when available and useful
+- `/chat` - Have slowpoke participate in the current conversation
+- `/tfti` - Thanks for the invite
 - `/imagine <prompt>` - Generate an image from text
-- `/remix <instructions>` - Remix an image (reply to a message with an image)
+- `/roll [sides]` - Roll a die
 
-### Prefix Commands
-- `!remix <instructions>` - Remix an image (reply to a message with an image)
+### Prefix commands
 
-## Original Project
+- `!remix <instructions>` - Reply to a message containing a Discord-hosted or Discord-proxied PNG, JPEG, or WebP image and edit it
 
-This TypeScript version is converted from the original Rust implementation, maintaining 1:1 functionality while adapting to TypeScript/Node.js patterns and Discord.js library conventions.
+Remix downloads are limited to 10 MiB and do not fetch arbitrary external embed URLs.
+
+## Operational notes
+
+- The current codex-lb deployment accepts `gpt-image-2` generation and edit requests even though that image model is not advertised by `GET /v1/models`.
+- GPT-5.6 dashboard cost accounting in codex-lb 1.20.1 may be inaccurate; verify provider usage before relying on dashboard totals for budgeting.
+- Anonymous Parallel MCP access is best-effort. A startup discovery failure disables web tools until slowpoke restarts.
+
+## Original project
+
+This TypeScript version is converted from the original Rust implementation while adapting to TypeScript, Node.js, and Discord.js conventions.

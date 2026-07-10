@@ -1,10 +1,10 @@
 import { SlashCommandBuilder, ChatInputCommandInteraction, EmbedBuilder, AttachmentBuilder } from 'discord.js'
-import { GeminiClient } from '../utils/gemini-client'
+import { ImageClient } from '../utils/image-client'
 import { logger } from '../utils/logger'
 import { SlashCommand } from '../models/commands'
 import { ColorProvider } from '../utils/color-provider'
 
-export const createImagineCommand = (geminiClient: GeminiClient, colorProvider: ColorProvider): SlashCommand => ({
+export const createImagineCommand = (imageClient: ImageClient, colorProvider: ColorProvider): SlashCommand => ({
   command: new SlashCommandBuilder()
     .setName('imagine')
     .setDescription('Image generation with slowpoke')
@@ -19,10 +19,10 @@ export const createImagineCommand = (geminiClient: GeminiClient, colorProvider: 
     // Defer the reply as AI models take time to respond
     await interaction.deferReply()
 
-    const promptText = interaction.options.get('prompt')?.value as string
+    const promptText = interaction.options.getString('prompt', true)
 
     try {
-      const imageData = await geminiClient.generateImage({
+      const imageData = await imageClient.generateImage({
         prompt: promptText
       })
 
