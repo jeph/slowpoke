@@ -1,138 +1,113 @@
-import { Message, EmbedBuilder, AttachmentBuilder } from 'discord.js'
-import { GeminiClient } from '../utils/gemini-client'
-import { logger } from '../utils/logger'
+import { AttachmentBuilder, EmbedBuilder, Message } from 'discord.js'
 import { PrefixCommand } from '../models/commands'
 import { ColorProvider } from '../utils/color-provider'
+import {
+  downloadDiscordImage,
+  DownloadedImage,
+  ImageDownloadError,
+  MAX_REMIX_IMAGE_BYTES
+} from '../utils/image-downloader'
+import { ImageClient } from '../utils/image-client'
+import { logger } from '../utils/logger'
 
 export const createRemixCommand = (
-  geminiClient: GeminiClient,
+  imageClient: ImageClient,
   colorProvider: ColorProvider
 ): PrefixCommand => ({
   name: 'remix',
   async execute (message) {
-    const prompt = message.content.replace(/^!remix\s*/, '').trim()
-    logger.info(`Got the following prompt: ${prompt}`)
+    const prompt = parseRemixPrompt(message.content)
+    logger.info({ promptLength: prompt.length }, 'Processing remix command')
 
     if (!prompt) {
-      logger.info('No prompt provided for remix command')
-      const embed = new EmbedBuilder()
-        .setTitle('Error')
-        .setDescription('Please provide instructions on how to remix.')
-        .setColor(colorProvider.getErrorColor())
-
-      await message.reply({ embeds: [embed] })
+      await replyWithError(message, colorProvider, 'Please provide instructions on how to remix.')
       return
     }
 
     if (!message.reference?.messageId) {
-      const embed = new EmbedBuilder()
-        .setTitle('Error')
-        .setDescription('Please reply to a message with an image to remix it.')
-        .setColor(colorProvider.getErrorColor())
-
-      await message.reply({ embeds: [embed] })
+      await replyWithError(message, colorProvider, 'Please reply to a message with an image to remix it.')
       return
     }
 
     try {
       const replyMessage = await message.channel.messages.fetch(message.reference.messageId)
-      logger.info('Got reply message')
+      const image = await getFirstUsableImage(replyMessage)
 
-      const imageDataFromAttachments = await getFirstImageFromAttachments(replyMessage)
-      const imageDataFromEmbed = !imageDataFromAttachments
-        ? await getImageDataFromEmbed(replyMessage)
-        : undefined
-
-      if (!imageDataFromAttachments && !imageDataFromEmbed) {
-        logger.info('No image found in attachments or embeds of the replied message')
-        const embed = new EmbedBuilder()
-          .setTitle('Error getting image')
-          .setDescription('Could not extract image from the referenced message.')
-          .setColor(colorProvider.getErrorColor())
-
-        await message.reply({ embeds: [embed] })
+      if (!image) {
+        await replyWithError(message, colorProvider, 'Could not find a Discord-hosted image in the referenced message.')
         return
       }
 
-      const imageData = imageDataFromAttachments ?? imageDataFromEmbed
-      if (!imageData) {
-        logger.info('Image data is undefined after checks, this should not happen')
-        const embed = new EmbedBuilder()
-          .setTitle('Error getting image')
-          .setDescription('Could not extract image from the referenced message.')
-          .setColor(colorProvider.getErrorColor())
-
-        await message.reply({ embeds: [embed] })
-        return
-      }
-      const { mimeType, buffer: imageBuffer } = imageData
-
-      const response = await geminiClient.editImage({
+      const response = await imageClient.editImage({
         prompt,
-        imageMimeType: mimeType,
-        imageData: imageBuffer
+        imageMimeType: image.mimeType,
+        imageData: image.buffer
       })
 
       const attachment = new AttachmentBuilder(response, { name: 'image.png' })
       await message.reply({ files: [attachment] })
     } catch (error) {
       logger.error({ error }, 'Error in remix command')
-      const embed = new EmbedBuilder()
-        .setTitle('Error')
-        .setDescription('There was an error processing the remix command.')
-        .setColor(colorProvider.getErrorColor())
-
-      await message.reply({ embeds: [embed] })
+      await replyWithError(message, colorProvider, getRemixErrorDescription(error))
     }
   }
 })
 
-interface ImageData {
-  mimeType: string;
-  buffer: Buffer;
+export const getFirstUsableImage = async (message: Message): Promise<DownloadedImage | undefined> => {
+  const attachmentCandidates = [...message.attachments.values()]
+    .map(attachment => ({ source: 'attachment' as const, url: attachment.url }))
+  const embedCandidates = message.embeds
+    .map(embed => embed.image?.proxyURL)
+    .filter((url): url is string => typeof url === 'string')
+    .map(url => ({ source: 'embed' as const, url }))
+  const candidates = [...attachmentCandidates, ...embedCandidates]
+
+  let lastError: unknown
+  for (const candidate of candidates) {
+    try {
+      return await downloadDiscordImage(candidate.url)
+    } catch (error) {
+      lastError = error
+      logger.info({
+        source: candidate.source,
+        errorCode: error instanceof ImageDownloadError ? error.code : 'unknown'
+      }, 'Unable to use remix image candidate')
+    }
+  }
+
+  if (lastError) throw lastError
+  return undefined
 }
 
-async function getFirstImageFromAttachments (message: Message): Promise<ImageData | undefined> {
-  logger.info('Getting first image from message attachments...')
+export const parseRemixPrompt = (content: string): string =>
+  content.replace(/^!remix(?:\s+|$)/i, '').trim()
 
-  const imageAttachment = message.attachments.find(attachment =>
-    attachment.contentType?.startsWith('image/')
-  )
-
-  if (!imageAttachment || !imageAttachment.contentType) {
-    logger.info('No image found from message attachments!')
-    return undefined
-  }
-
-  const response = await fetch(imageAttachment.url)
-  if (!response.ok) {
-    logger.info(`Failed to fetch image from attachment URL: ${response}`)
-    throw new Error(`Failed to fetch image from attachment URL: ${response}`)
-  }
-  const arrayBuffer = await response.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
-  return { mimeType: imageAttachment.contentType, buffer }
+const replyWithError = async (
+  message: Message,
+  colorProvider: ColorProvider,
+  description: string
+): Promise<void> => {
+  const embed = new EmbedBuilder()
+    .setTitle('Error')
+    .setDescription(description)
+    .setColor(colorProvider.getErrorColor())
+  await message.reply({ embeds: [embed] })
 }
 
-async function getImageDataFromEmbed (message: Message): Promise<ImageData | undefined> {
-  const embed = message.embeds.find(embed => embed.image)
-  if (!embed?.image?.url) {
-    return undefined
+const getRemixErrorDescription = (error: unknown): string => {
+  if (!(error instanceof ImageDownloadError)) {
+    return 'There was an error processing the remix command.'
   }
 
-  const response = await fetch(embed.image.url)
-  if (!response.ok) {
-    logger.info(`Failed to fetch image from embed URL: ${response}`)
-    throw new Error(`Failed to fetch image from embed URL: ${response}`)
+  switch (error.code) {
+    case 'unsupported_format':
+      return 'Only PNG, JPEG, and WebP images can be remixed.'
+    case 'too_large':
+      return `The source image is too large. Use an image under ${MAX_REMIX_IMAGE_BYTES / 1024 / 1024} MiB.`
+    case 'disallowed_url':
+      return 'Only Discord-hosted or Discord-proxied images can be remixed.'
+    case 'too_many_redirects':
+    case 'download_failed':
+      return 'The source image could not be downloaded from Discord.'
   }
-
-  const mimeType = response.headers.get('content-type')
-  if (!mimeType) {
-    return undefined
-  }
-
-  const arrayBuffer = await response.arrayBuffer()
-  const buffer = Buffer.from(arrayBuffer)
-
-  return { mimeType, buffer }
 }

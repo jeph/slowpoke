@@ -43,7 +43,7 @@ export const createDeezNutsChimeIn = (openAIClient: OpenAIClient, config: DeezNu
         systemInstruction: SYSTEM_INSTRUCTION,
         prompt: `User message: "${message.content}"`
       })
-      logger.info(response)
+      logger.info({ responseLength: response.length }, 'Received deez nuts chime-in response')
 
       if (response.includes('No good joke')) {
         return false

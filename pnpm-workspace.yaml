@@ -12,6 +12,3 @@ overrides:
 onlyBuiltDependencies:
   - esbuild
   - protobufjs
-
-ignoredBuiltDependencies:
-  - '@google/genai'

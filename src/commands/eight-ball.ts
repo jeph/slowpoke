@@ -82,7 +82,7 @@ export const createEightBallCommand = (colorProvider: ColorProvider): SlashComma
       return
     }
 
-    logger.info(`Received question: ${question}`)
+    logger.info({ questionLength: question.length }, 'Received 8 ball question')
     logger.info('Returning response...')
     embed.addFields({
       name: `❓ ${question}`,
