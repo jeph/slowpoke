@@ -2,7 +2,7 @@ import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from '@langchain/
 import { StructuredToolInterface } from '@langchain/core/tools'
 import { ChatOpenAI } from '@langchain/openai'
 import { createAgent, toolCallLimitMiddleware } from 'langchain'
-import { CODEX_LB_BASE_URL, CODEX_LB_TEXT_MODEL } from '../config'
+import { OPENAI_COMPATIBLE_BASE_URL, OPENAI_TEXT_MODEL } from '../config'
 import { logger } from './logger'
 
 const REQUEST_TIMEOUT_MS = 5 * 60 * 1000
@@ -26,10 +26,10 @@ export interface OpenAIClientOptions {
 
 export const createOpenAIClient = (options: OpenAIClientOptions): OpenAIClient => {
   const chatModel = new ChatOpenAI({
-    model: CODEX_LB_TEXT_MODEL,
+    model: OPENAI_TEXT_MODEL,
     apiKey: options.apiKey,
     configuration: {
-      baseURL: CODEX_LB_BASE_URL
+      baseURL: OPENAI_COMPATIBLE_BASE_URL
     },
     useResponsesApi: true,
     reasoning: { effort: 'medium' },
@@ -48,11 +48,11 @@ export const createOpenAIClient = (options: OpenAIClientOptions): OpenAIClient =
         promptLength: prompt.length,
         hasSystemInstruction: !!systemInstruction,
         toolNames: tools.map(tool => tool.name),
-        model: CODEX_LB_TEXT_MODEL,
+        model: OPENAI_TEXT_MODEL,
         reasoningEffort: 'medium',
         timeoutMs: REQUEST_TIMEOUT_MS,
         maxRetries: MAX_RETRIES
-      }, 'Sending prompt to codex-lb')
+      }, 'Sending prompt to OpenAI-compatible API')
 
       const text = tools.length > 0
         ? await invokeAgentWithTools(chatModel, prompt, systemInstruction, tools)
@@ -61,11 +61,11 @@ export const createOpenAIClient = (options: OpenAIClientOptions): OpenAIClient =
           : [new HumanMessage(prompt)]).then(response => response.text)
 
       if (!text) {
-        logger.error('No text returned from codex-lb')
+        logger.error('No text returned from OpenAI-compatible API')
         throw new Error('No text was returned from the LLM via inference')
       }
 
-      logger.info({ textLength: text.length }, 'Received response from codex-lb')
+      logger.info({ textLength: text.length }, 'Received response from OpenAI-compatible API')
       return text
     }
   }

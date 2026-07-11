@@ -3,7 +3,7 @@ import test from 'node:test'
 import { File } from 'node:buffer'
 import type { Uploadable } from 'openai'
 import type { ImageEditParamsNonStreaming, ImageGenerateParamsNonStreaming } from 'openai/resources/images'
-import { CODEX_LB_IMAGE_MODEL } from '../src/config'
+import { OPENAI_IMAGE_MODEL } from '../src/config'
 import { createOpenAIImageClient, ImageProviderError } from '../src/utils/openai-image-client'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01])
@@ -25,7 +25,7 @@ test('image generation requests one non-streaming PNG from GPT Image 2', async (
 
   assert.deepEqual(await client.generateImage({ prompt: 'draw a slowpoke' }), PNG)
   assert.deepEqual(request, {
-    model: CODEX_LB_IMAGE_MODEL,
+    model: OPENAI_IMAGE_MODEL,
     prompt: 'draw a slowpoke',
     n: 1,
     output_format: 'png',
@@ -60,7 +60,7 @@ test('image edits preserve validated MIME type, filename, and bytes', async () =
     imageData: source
   }), PNG)
   assert.deepEqual(upload, { data: source, name: 'input.jpg', type: 'image/jpeg' })
-  assert.equal(request?.model, CODEX_LB_IMAGE_MODEL)
+  assert.equal(request?.model, OPENAI_IMAGE_MODEL)
   assert.equal(request?.prompt, 'add sunglasses')
   assert.equal(request?.n, 1)
   assert.equal(request?.output_format, 'png')

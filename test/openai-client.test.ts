@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
-import { CODEX_LB_BASE_URL, CODEX_LB_TEXT_MODEL } from '../src/config'
+import { OPENAI_COMPATIBLE_BASE_URL, OPENAI_TEXT_MODEL } from '../src/config'
 import { createOpenAIClient } from '../src/utils/openai-client'
 
 interface CapturedRequest {
@@ -11,7 +11,7 @@ interface CapturedRequest {
   body: Record<string, unknown>;
 }
 
-test('direct prompts use codex-lb Responses with stateless encrypted reasoning', async () => {
+test('direct prompts use the OpenAI-compatible Responses API with stateless encrypted reasoning', async () => {
   const captured: CapturedRequest[] = []
   const restoreFetch = replaceFetch(async request => {
     captured.push(await captureRequest(request))
@@ -19,7 +19,7 @@ test('direct prompts use codex-lb Responses with stateless encrypted reasoning',
   })
 
   try {
-    const client = createOpenAIClient({ apiKey: 'test-codex-key' })
+    const client = createOpenAIClient({ apiKey: 'test-api-key' })
     const result = await client.prompt({
       systemInstruction: 'system instruction',
       prompt: 'hello'
@@ -28,9 +28,9 @@ test('direct prompts use codex-lb Responses with stateless encrypted reasoning',
     assert.equal(result, 'direct answer')
     assert.equal(captured.length, 1)
     const request = captured[0]
-    assert.equal(request.url, `${CODEX_LB_BASE_URL}/responses`)
-    assert.equal(request.headers.get('authorization'), 'Bearer test-codex-key')
-    assert.equal(request.body.model, CODEX_LB_TEXT_MODEL)
+    assert.equal(request.url, `${OPENAI_COMPATIBLE_BASE_URL}/responses`)
+    assert.equal(request.headers.get('authorization'), 'Bearer test-api-key')
+    assert.equal(request.body.model, OPENAI_TEXT_MODEL)
     assert.equal(request.body.store, false)
     assert.equal(request.body.stream, false)
     assert.deepEqual(request.body.reasoning, { effort: 'medium' })
@@ -61,7 +61,7 @@ test('agent tool rounds preserve encrypted reasoning and request options', async
   )
 
   try {
-    const client = createOpenAIClient({ apiKey: 'test-codex-key' })
+    const client = createOpenAIClient({ apiKey: 'test-api-key' })
     const result = await client.prompt({
       systemInstruction: 'use the lookup tool',
       prompt: 'look this up',
@@ -73,7 +73,7 @@ test('agent tool rounds preserve encrypted reasoning and request options', async
     for (const request of captured) {
       assert.deepEqual(request.body.include, ['reasoning.encrypted_content'])
       assert.equal(request.body.store, false)
-      assert.equal(request.body.model, CODEX_LB_TEXT_MODEL)
+      assert.equal(request.body.model, OPENAI_TEXT_MODEL)
     }
 
     const secondInput = JSON.stringify(captured[1].body.input)
@@ -117,7 +117,7 @@ const baseResponse = (output: Array<Record<string, unknown>>): Record<string, un
   incomplete_details: null,
   instructions: null,
   metadata: {},
-  model: CODEX_LB_TEXT_MODEL,
+  model: OPENAI_TEXT_MODEL,
   output,
   parallel_tool_calls: true,
   previous_response_id: null,
