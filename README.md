@@ -19,6 +19,8 @@ The deployment is intentionally fixed to:
 
 ## Setup
 
+Local development requires Node.js 26 and pnpm 11.11.0. TypeScript remains on 6.0.3 because the current `typescript-eslint` release supports TypeScript versions below 6.1; TypeScript 7 currently crashes its parser.
+
 1. Install dependencies:
 
    ```bash

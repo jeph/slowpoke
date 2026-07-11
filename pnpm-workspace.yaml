@@ -1,14 +1,18 @@
 packages:
   - .
 
-# Narrow security overrides for GHSA-w5hq-g745-h8pq until LangGraph
-# declares a patched uuid range upstream.
+# Discord.js currently pins an older undici 6.x release; keep it on the
+# compatible patched release until the upstream pin advances.
 overrides:
-  '@langchain/langgraph>uuid': '11.1.1'
-  '@langchain/langgraph-checkpoint>uuid': '11.1.1'
+  undici: '6.27.0'
+
+# This exact release was intentionally reviewed during the dependency refresh;
+# exempt it without weakening pnpm 11's one-day policy for other packages.
+minimumReleaseAgeExclude:
+  - 'eslint@10.7.0'
 
 # Keep pnpm lifecycle script policy explicit instead of approving
 # newly introduced build scripts automatically.
-onlyBuiltDependencies:
-  - esbuild
-  - protobufjs
+allowBuilds:
+  esbuild: true
+  protobufjs: true

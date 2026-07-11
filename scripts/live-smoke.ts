@@ -95,11 +95,7 @@ const main = async (): Promise<void> => {
     }
   })()
 
-  const {
-    toolCalls,
-    encryptedReasoningReturned,
-    encryptedReasoningForwarded
-  } = await runPhase('encrypted reasoning continuity', () => {
+  const { toolCallResponseIndex, toolCalls } = await runPhase('tool call trace validation', () => {
     const toolCallResponseIndex = responsesTrace.responses.findIndex(response =>
       getArray(response.output).some(item => getRecord(item).type === 'function_call')
     )
@@ -111,20 +107,22 @@ const main = async (): Promise<void> => {
       .length
     assert.equal(toolCalls, 1)
 
+    return { toolCallResponseIndex, toolCalls }
+  })
+
+  const encryptedReasoningReturned = await runPhase('encrypted reasoning response validation', () => {
     const encryptedReasoningReturned = getArray(responsesTrace.responses[toolCallResponseIndex].output)
       .some(item => typeof getRecord(item).encrypted_content === 'string')
     assert.equal(encryptedReasoningReturned, true)
+    return encryptedReasoningReturned
+  })
 
+  const encryptedReasoningForwarded = await runPhase('encrypted reasoning forwarding validation', () => {
     const nextRequest = responsesTrace.requests[toolCallResponseIndex + 1]
     const nextInput = JSON.stringify(nextRequest?.input) ?? ''
     const encryptedReasoningForwarded = nextInput.includes('encrypted_content')
     assert.equal(encryptedReasoningForwarded, true)
-
-    return {
-      toolCalls,
-      encryptedReasoningReturned,
-      encryptedReasoningForwarded
-    }
+    return encryptedReasoningForwarded
   })
 
   const imageResults = runImageTests

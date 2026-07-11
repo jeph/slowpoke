@@ -1,10 +1,10 @@
 # ---- Build application ----
-FROM node:25-slim AS builder
+FROM node:26-slim AS builder
 
 WORKDIR /usr/src/slowpoke
 
 # Install pnpm
-RUN npm install -g pnpm@10.28.0
+RUN npm install -g pnpm@11.11.0
 
 # Copy package files and pnpm workspace config first for better caching.
 # pnpm-workspace.yaml contains the override/build-script policy that must
@@ -22,7 +22,7 @@ RUN pnpm run build
 RUN pnpm prune --prod
 
 # ---- Create runtime image ----
-FROM node:25-slim AS runtime
+FROM node:26-slim AS runtime
 
 # Set the working directory
 WORKDIR /app
