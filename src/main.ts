@@ -1,153 +1,156 @@
 import { Client, Events, GatewayIntentBits, Partials } from 'discord.js'
 import dotenv from 'dotenv'
-import { GoogleGenAI } from '@google/genai'
-import { createGeminiClient } from './utils/gemini-client'
-import { createOpenAIClient } from './utils/openai-client'
-import { startActivityRotation } from './utils/activity-manager'
-import { logger } from './utils/logger'
-import { createCommandRegistrar } from './utils/command-registrar'
-import { createColorProvider } from './utils/color-provider'
-import { createWebTools } from './utils/web-tools'
+import { createDeezNutsChimeIn } from './chime-ins/deez-nuts'
 import { createChatCommand } from './commands/chat'
 import { createEightBallCommand } from './commands/eight-ball'
 import { createImagineCommand } from './commands/imagine'
 import { createPingCommand } from './commands/ping'
 import { createPromptCommand } from './commands/prompt'
 import { createRemixCommand } from './commands/remix'
-import { createTftiCommand } from './commands/tfti'
 import { createRollCommand } from './commands/roll'
+import { createTftiCommand } from './commands/tfti'
+import {
+  CODEX_LB_BASE_URL,
+  CODEX_LB_IMAGE_MODEL,
+  CODEX_LB_TEXT_MODEL,
+  loadConfig,
+  PARALLEL_SEARCH_MCP_URL
+} from './config'
 import { PrefixCommand, SlashCommand } from './models/commands'
-import { createDeezNutsChimeIn } from './chime-ins/deez-nuts'
+import { startActivityRotation } from './utils/activity-manager'
+import { createOpenAIImageClient } from './utils/openai-image-client'
+import { createColorProvider } from './utils/color-provider'
+import { createCommandRegistrar } from './utils/command-registrar'
+import { logger } from './utils/logger'
+import { createOpenAIClient } from './utils/openai-client'
+import { createWebTools } from './utils/web-tools'
 
-// Load environment variables
-dotenv.config()
-
+dotenv.config({ quiet: true })
 process.title = 'slowpoke'
 
-logger.info('Getting discord token from environment')
-const token = process.env.DISCORD_TOKEN
-if (!token) {
-  throw new Error('DISCORD_TOKEN was not found')
-}
-logger.info('Successfully got discord token from environment')
+const main = async (): Promise<void> => {
+  const config = loadConfig()
 
-logger.info('Getting application id from environment')
-const discordApplicationId = process.env.DISCORD_APPLICATION_ID
-if (!discordApplicationId) {
-  throw new Error('DISCORD_APPLICATION_ID was not found')
-}
-logger.info('Successfully got application id from environment')
+  logger.info({
+    baseUrl: CODEX_LB_BASE_URL,
+    textModel: CODEX_LB_TEXT_MODEL,
+    imageModel: CODEX_LB_IMAGE_MODEL,
+    parallelSearchMcpUrl: PARALLEL_SEARCH_MCP_URL
+  }, 'Configuring AI providers')
 
-logger.info('Getting gemini api key from secret store')
-const geminiApiKey = process.env.GEMINI_API_KEY
-if (!geminiApiKey) {
-  throw new Error('GEMINI_API_KEY was not found')
-}
-logger.info('Successfully got gemini api key from environment')
+  const openAIClient = createOpenAIClient({ apiKey: config.codexLbApiKey })
+  const imageClient = createOpenAIImageClient({ apiKey: config.codexLbApiKey })
+  const colorProvider = createColorProvider()
+  const webTools = await createWebTools()
 
-logger.info('Getting Brave Search API key from environment')
-const braveSearchApiKey = process.env.BRAVE_SEARCH_API_KEY
-if (!braveSearchApiKey) {
-  throw new Error('BRAVE_SEARCH_API_KEY was not found')
-}
-logger.info('Successfully got Brave Search API key from environment')
+  const slashCommandList: SlashCommand[] = [
+    createPingCommand(colorProvider),
+    createEightBallCommand(colorProvider),
+    createPromptCommand(openAIClient, colorProvider, webTools.tools),
+    createChatCommand(openAIClient, webTools.tools),
+    createTftiCommand(colorProvider),
+    createImagineCommand(imageClient, colorProvider),
+    createRollCommand(colorProvider)
+  ]
 
-const googleGenAI = new GoogleGenAI({ apiKey: geminiApiKey })
-const geminiClient = createGeminiClient({
-  googleGenAI,
-  imageGenerationModel: 'gemini-2.0-flash-preview-image-generation'
-})
-logger.info({ model: 'gpt-5.5', reasoningEffort: 'medium', serviceTier: 'default', timeoutMs: 5 * 60 * 1000 }, 'Configuring OpenAI client')
-const openAIClient = createOpenAIClient()
-const colorProvider = createColorProvider()
-const webTools = createWebTools(braveSearchApiKey)
+  const slashCommands = new Map<string, SlashCommand>(
+    slashCommandList.map(command => [command.command.name, command])
+  )
+  const prefixCommandList: PrefixCommand[] = [
+    createRemixCommand(imageClient, colorProvider)
+  ]
+  const prefixCommands = new Map<string, PrefixCommand>(
+    prefixCommandList.map(command => [command.name, command])
+  )
 
-const slashCommandList: SlashCommand[] = [
-  createPingCommand(colorProvider),
-  createEightBallCommand(colorProvider),
-  createPromptCommand(openAIClient, colorProvider, webTools),
-  createChatCommand(openAIClient, webTools),
-  createTftiCommand(colorProvider),
-  createImagineCommand(geminiClient, colorProvider),
-  createRollCommand(colorProvider)
-]
+  const commandRegistrar = createCommandRegistrar(config.discordToken, config.discordApplicationId)
+  const client = new Client({
+    intents: [
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.DirectMessages
+    ],
+    partials: [Partials.Channel]
+  })
 
-const slashCommands = new Map<string, SlashCommand>(
-  slashCommandList.map(command => [command.command.name, command])
-)
+  client.on(Events.InteractionCreate, async (interaction) => {
+    if (!interaction.isChatInputCommand()) return
 
-const commandRegistrar = createCommandRegistrar(token, discordApplicationId)
+    const command = slashCommands.get(interaction.commandName)
+    if (!command) return
 
-const prefixCommandList: PrefixCommand[] = [
-  createRemixCommand(geminiClient, colorProvider)
-]
+    try {
+      await command.execute(interaction)
+    } catch (error) {
+      logger.error({ error, commandName: interaction.commandName }, 'Error executing slash command')
+      const errorMessage = 'There was an error while executing this command!'
 
-const prefixCommands = new Map<string, PrefixCommand>(
-  prefixCommandList.map(command => [command.name, command])
-)
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ content: errorMessage })
+        return
+      }
+      await interaction.reply({ content: errorMessage })
+    }
+  })
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.DirectMessages
-  ],
-  partials: [Partials.Channel]
-})
+  const deezNutsChimeIn = createDeezNutsChimeIn(openAIClient, { chimeInProbability: 0.01 })
 
-client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isChatInputCommand()) return
+  client.on(Events.MessageCreate, async (message) => {
+    if (message.author.bot) return
 
-  const command = slashCommands.get(interaction.commandName)
-  if (!command) return
-
-  try {
-    await command.execute(interaction)
-  } catch (error) {
-    logger.error({ error, commandName: interaction.commandName }, 'Error executing slash command')
-    const errorMessage = 'There was an error while executing this command!'
-
-    if (interaction.replied || interaction.deferred) {
-      await interaction.followUp({ content: errorMessage })
+    const prefix = '!'
+    if (!message.content.startsWith(prefix)) {
+      await deezNutsChimeIn.execute(message)
       return
     }
-    await interaction.reply({ content: errorMessage })
+
+    const args = message.content.slice(prefix.length).trim().split(/ +/)
+    const commandName = args.shift()?.toLowerCase()
+    if (!commandName) return
+
+    const prefixCommand = prefixCommands.get(commandName)
+    if (!prefixCommand) return
+
+    try {
+      await prefixCommand.execute(message)
+    } catch (error) {
+      logger.error({ error }, 'Error executing prefix command')
+      await message.reply('There was an error while executing this command!')
+    }
+  })
+
+  client.once(Events.ClientReady, async () => {
+    logger.info('Client ready!')
+    try {
+      await commandRegistrar.register(slashCommandList)
+      startActivityRotation(client)
+    } catch (error) {
+      logger.error({ error }, 'Unable to register slash commands')
+    }
+  })
+
+  let shuttingDown = false
+  const shutdown = async (signal: string): Promise<void> => {
+    if (shuttingDown) return
+    shuttingDown = true
+    logger.info({ signal }, 'Shutting down slowpoke')
+    client.destroy()
+    await webTools.close()
   }
-})
-
-const deezNutsChimeIn = createDeezNutsChimeIn(openAIClient, { chimeInProbability: 0.01 })
-
-client.on(Events.MessageCreate, async (message) => {
-  if (message.author.bot) return
-
-  const prefix = '!'
-  if (!message.content.startsWith(prefix)) {
-    await deezNutsChimeIn.execute(message)
-    return
-  }
-
-  const args = message.content.slice(prefix.length).trim().split(/ +/)
-  const commandName = args.shift()?.toLowerCase()
-  if (!commandName) return
-
-  const prefixCommand = prefixCommands.get(commandName)
-  if (!prefixCommand) return
+  process.once('SIGINT', () => { void shutdown('SIGINT') })
+  process.once('SIGTERM', () => { void shutdown('SIGTERM') })
 
   try {
-    await prefixCommand.execute(message)
+    await client.login(config.discordToken)
+    logger.info('Initialized slowpoke!')
   } catch (error) {
-    logger.error({ error }, 'Error executing prefix command')
-    await message.reply('There was an error while executing this command!')
+    await webTools.close()
+    throw error
   }
-})
+}
 
-client.once(Events.ClientReady, async () => {
-  logger.info('Client ready!')
-  await commandRegistrar.register(slashCommandList)
-  startActivityRotation(client)
+void main().catch(error => {
+  logger.fatal({ error }, 'Failed to initialize slowpoke')
+  process.exitCode = 1
 })
-
-client.login(token)
-  .then(() => logger.info('Initialized slowpoke!'))
-  .catch(err => logger.error(err))
