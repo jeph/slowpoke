@@ -54,16 +54,13 @@ export const createRemixCommand = (
 })
 
 export const getFirstUsableImage = async (message: Message): Promise<DownloadedImage | undefined> => {
-  const candidates: Array<{ source: 'attachment' | 'embed'; url: string }> = []
-  for (const attachment of message.attachments.values()) {
-    candidates.push({ source: 'attachment', url: attachment.url })
-  }
-
-  for (const embed of message.embeds) {
-    if (embed.image?.proxyURL) {
-      candidates.push({ source: 'embed', url: embed.image.proxyURL })
-    }
-  }
+  const attachmentCandidates = [...message.attachments.values()]
+    .map(attachment => ({ source: 'attachment' as const, url: attachment.url }))
+  const embedCandidates = message.embeds
+    .map(embed => embed.image?.proxyURL)
+    .filter((url): url is string => typeof url === 'string')
+    .map(url => ({ source: 'embed' as const, url }))
+  const candidates = [...attachmentCandidates, ...embedCandidates]
 
   let lastError: unknown
   for (const candidate of candidates) {

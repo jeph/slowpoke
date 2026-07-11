@@ -17,7 +17,7 @@ interface ImagesApi {
 
 type FileFactory = (data: Buffer, name: string, options: { type: string }) => Promise<Uploadable>
 
-export interface CodexLbImageClientOptions {
+export interface OpenAIImageClientOptions {
   apiKey: string;
   imagesApi?: ImagesApi;
   fileFactory?: FileFactory;
@@ -37,7 +37,7 @@ export class ImageProviderError extends Error {
   }
 }
 
-export const createCodexLbImageClient = (options: CodexLbImageClientOptions): ImageClient => {
+export const createOpenAIImageClient = (options: OpenAIImageClientOptions): ImageClient => {
   const openAI = options.imagesApi
     ? undefined
     : new OpenAI({

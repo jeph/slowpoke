@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream'
 import { EditableImageMimeType } from './image-client'
 
 export const MAX_REMIX_IMAGE_BYTES = 10 * 1024 * 1024
@@ -149,19 +150,17 @@ const readResponseBody = async (response: Response, maxBytes: number): Promise<B
     throw new ImageDownloadError('download_failed', 'The image response had no body')
   }
 
-  const reader = response.body.getReader()
+  const readable = Readable.fromWeb(response.body)
   const chunks: Buffer[] = []
   let totalBytes = 0
 
-  while (true) {
-    const { done, value } = await reader.read()
-    if (done) break
-    totalBytes += value.byteLength
+  for await (const chunk of readable) {
+    const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+    totalBytes += buffer.length
     if (totalBytes > maxBytes) {
-      await reader.cancel()
       throw new ImageDownloadError('too_large', 'The image is larger than the allowed limit')
     }
-    chunks.push(Buffer.from(value))
+    chunks.push(buffer)
   }
 
   if (totalBytes === 0) {

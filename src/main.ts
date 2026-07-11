@@ -18,7 +18,7 @@ import {
 } from './config'
 import { PrefixCommand, SlashCommand } from './models/commands'
 import { startActivityRotation } from './utils/activity-manager'
-import { createCodexLbImageClient } from './utils/codex-lb-image-client'
+import { createOpenAIImageClient } from './utils/openai-image-client'
 import { createColorProvider } from './utils/color-provider'
 import { createCommandRegistrar } from './utils/command-registrar'
 import { logger } from './utils/logger'
@@ -39,7 +39,7 @@ const main = async (): Promise<void> => {
   }, 'Configuring AI providers')
 
   const openAIClient = createOpenAIClient({ apiKey: config.codexLbApiKey })
-  const imageClient = createCodexLbImageClient({ apiKey: config.codexLbApiKey })
+  const imageClient = createOpenAIImageClient({ apiKey: config.codexLbApiKey })
   const colorProvider = createColorProvider()
   const webTools = await createWebTools()
 

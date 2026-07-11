@@ -46,7 +46,7 @@ export const createWebTools = async (options: CreateWebToolsOptions = {}): Promi
   })
 
   try {
-    const discoveredTools = await withTimeout(
+    const discoveredTools = await withDiscoveryTimeout(
       client.getTools(),
       options.discoveryTimeoutMs ?? WEB_TOOL_DISCOVERY_TIMEOUT_MS
     )
@@ -85,7 +85,8 @@ const createDisabledWebTools = (): WebTools => ({
   close: async () => {}
 })
 
-const withTimeout = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
+// The adapter supports tool-call timeouts, but not a timeout for its initial getTools() discovery.
+const withDiscoveryTimeout = async <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
   let timeout: ReturnType<typeof setTimeout> | undefined
   try {
     return await Promise.race([

@@ -4,13 +4,13 @@ import { File } from 'node:buffer'
 import type { Uploadable } from 'openai'
 import type { ImageEditParamsNonStreaming, ImageGenerateParamsNonStreaming } from 'openai/resources/images'
 import { CODEX_LB_IMAGE_MODEL } from '../src/config'
-import { createCodexLbImageClient, ImageProviderError } from '../src/utils/codex-lb-image-client'
+import { createOpenAIImageClient, ImageProviderError } from '../src/utils/openai-image-client'
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01])
 
 test('image generation requests one non-streaming PNG from GPT Image 2', async () => {
   let request: ImageGenerateParamsNonStreaming | undefined
-  const client = createCodexLbImageClient({
+  const client = createOpenAIImageClient({
     apiKey: 'unused-test-key',
     imagesApi: {
       async generate (body) {
@@ -37,7 +37,7 @@ test('image edits preserve validated MIME type, filename, and bytes', async () =
   const source = Buffer.from([0xff, 0xd8, 0xff, 0x01])
   let upload: { data: Buffer; name: string; type: string } | undefined
   let request: ImageEditParamsNonStreaming | undefined
-  const client = createCodexLbImageClient({
+  const client = createOpenAIImageClient({
     apiKey: 'unused-test-key',
     fileFactory: async (data, name, options): Promise<Uploadable> => {
       upload = { data, name, type: options.type }
@@ -68,7 +68,7 @@ test('image edits preserve validated MIME type, filename, and bytes', async () =
 })
 
 test('invalid image output is rejected', async () => {
-  const client = createCodexLbImageClient({
+  const client = createOpenAIImageClient({
     apiKey: 'unused-test-key',
     imagesApi: {
       async generate () {
@@ -88,7 +88,7 @@ test('invalid image output is rejected', async () => {
 
 test('image requests are not retried by the adapter', async () => {
   let attempts = 0
-  const client = createCodexLbImageClient({
+  const client = createOpenAIImageClient({
     apiKey: 'unused-test-key',
     imagesApi: {
       async generate () {
