@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import {
-  CODEX_LB_BASE_URL,
-  CODEX_LB_IMAGE_MODEL,
-  CODEX_LB_TEXT_MODEL,
   loadConfig,
+  OPENAI_COMPATIBLE_BASE_URL,
+  OPENAI_IMAGE_MODEL,
+  OPENAI_TEXT_MODEL,
   PARALLEL_SEARCH_MCP_URL
 } from '../src/config'
 
@@ -12,11 +12,11 @@ test('loadConfig accepts only the required runtime secrets and identifiers', () 
   assert.deepEqual(loadConfig({
     DISCORD_TOKEN: 'discord-token',
     DISCORD_APPLICATION_ID: 'application-id',
-    CODEX_LB_API_KEY: 'codex-key'
+    CODEX_LB_API_KEY: 'api-key'
   }), {
     discordToken: 'discord-token',
     discordApplicationId: 'application-id',
-    codexLbApiKey: 'codex-key'
+    openAIApiKey: 'api-key'
   })
 })
 
@@ -35,8 +35,8 @@ test('loadConfig reports variable names without leaking values', () => {
 })
 
 test('provider endpoints and models are fixed application constants', () => {
-  assert.equal(CODEX_LB_BASE_URL, 'https://codex.jeph.io/v1')
-  assert.equal(CODEX_LB_TEXT_MODEL, 'gpt-5.6-terra')
-  assert.equal(CODEX_LB_IMAGE_MODEL, 'gpt-image-2')
+  assert.equal(OPENAI_COMPATIBLE_BASE_URL, 'https://codex.jeph.io/v1')
+  assert.equal(OPENAI_TEXT_MODEL, 'gpt-5.6-terra')
+  assert.equal(OPENAI_IMAGE_MODEL, 'gpt-image-2')
   assert.equal(PARALLEL_SEARCH_MCP_URL, 'https://search.parallel.ai/mcp')
 })

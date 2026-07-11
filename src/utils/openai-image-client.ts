@@ -4,7 +4,7 @@ import {
   ImageGenerateParamsNonStreaming,
   ImagesResponse
 } from 'openai/resources/images'
-import { CODEX_LB_BASE_URL, CODEX_LB_IMAGE_MODEL } from '../config'
+import { OPENAI_COMPATIBLE_BASE_URL, OPENAI_IMAGE_MODEL } from '../config'
 import { EditableImageMimeType, ImageClient } from './image-client'
 
 const IMAGE_REQUEST_TIMEOUT_MS = 10 * 60 * 1000
@@ -42,7 +42,7 @@ export const createOpenAIImageClient = (options: OpenAIImageClientOptions): Imag
     ? undefined
     : new OpenAI({
       apiKey: options.apiKey,
-      baseURL: CODEX_LB_BASE_URL,
+      baseURL: OPENAI_COMPATIBLE_BASE_URL,
       timeout: IMAGE_REQUEST_TIMEOUT_MS,
       maxRetries: IMAGE_REQUEST_MAX_RETRIES
     })
@@ -53,7 +53,7 @@ export const createOpenAIImageClient = (options: OpenAIImageClientOptions): Imag
     async generateImage ({ prompt }): Promise<Buffer> {
       try {
         const response = await imagesApi.generate({
-          model: CODEX_LB_IMAGE_MODEL,
+          model: OPENAI_IMAGE_MODEL,
           prompt,
           n: 1,
           output_format: 'png',
@@ -73,7 +73,7 @@ export const createOpenAIImageClient = (options: OpenAIImageClientOptions): Imag
           { type: imageMimeType }
         )
         const response = await imagesApi.edit({
-          model: CODEX_LB_IMAGE_MODEL,
+          model: OPENAI_IMAGE_MODEL,
           prompt,
           image,
           n: 1,

@@ -4,15 +4,15 @@ slowpoke is a Discord bot converted from Rust to TypeScript, named after the Pok
 
 ## Features
 
-- **Chat and Prompt**: GPT-5.6 text generation through codex-lb and LangChainJS
+- **Chat and Prompt**: GPT-5.6 text generation through an OpenAI-compatible API and LangChainJS
 - **Web Tools**: Anonymous Parallel Search MCP tools for current web information and source extraction
-- **Image Generation**: GPT Image 2 text-to-image generation through codex-lb
+- **Image Generation**: GPT Image 2 text-to-image generation through an OpenAI-compatible API
 - **Image Remix**: GPT Image 2 edits of Discord-hosted PNG, JPEG, and WebP images
 - **Utilities**: Ping, 8-ball, dice rolling, and TFTI commands
 
 The deployment is intentionally fixed to:
 
-- codex-lb: `https://codex.jeph.io/v1`
+- OpenAI-compatible API: `https://codex.jeph.io/v1`
 - text model: `gpt-5.6-terra`
 - image model: `gpt-image-2`
 - Parallel Search MCP: `https://search.parallel.ai/mcp`
@@ -37,9 +37,9 @@ Local development requires Node.js 26 and pnpm 11.11.0. TypeScript remains on 6.
 
    - `DISCORD_TOKEN`: Discord bot token
    - `DISCORD_APPLICATION_ID`: Discord application ID
-   - `CODEX_LB_API_KEY`: codex-lb key allowed to use `gpt-5.6-terra` and `gpt-image-2`
+   - `CODEX_LB_API_KEY`: API key allowed to use `gpt-5.6-terra` and `gpt-image-2` through the configured OpenAI-compatible endpoint
 
-The codex-lb key is sent only to `https://codex.jeph.io/v1`. Do not commit `.env` or put runtime secrets in a Docker image.
+The API key is sent only to `https://codex.jeph.io/v1`. The existing environment-variable name is retained for deployment compatibility. Do not commit `.env` or put runtime secrets in a Docker image.
 
 Parallel's Search MCP is used anonymously and does not require an API key. Anonymous access has lower rate limits than authenticated Parallel plans. If the MCP cannot be reached during startup, slowpoke starts without web tools; text and image features remain available until the next restart.
 
@@ -101,8 +101,8 @@ Remix downloads are limited to 10 MiB and do not fetch arbitrary external embed 
 
 ## Operational notes
 
-- The current codex-lb deployment accepts `gpt-image-2` generation and edit requests even though that image model is not advertised by `GET /v1/models`.
-- GPT-5.6 dashboard cost accounting in codex-lb 1.20.1 may be inaccurate; verify provider usage before relying on dashboard totals for budgeting.
+- The current OpenAI-compatible gateway accepts `gpt-image-2` generation and edit requests even though that image model is not advertised by `GET /v1/models`.
+- GPT-5.6 dashboard cost accounting in gateway version 1.20.1 may be inaccurate; verify provider usage before relying on dashboard totals for budgeting.
 - Anonymous Parallel MCP access is best-effort. A startup discovery failure disables web tools until slowpoke restarts.
 
 ## Original project

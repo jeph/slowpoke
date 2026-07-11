@@ -4,10 +4,10 @@ import dotenv from 'dotenv'
 import OpenAI, { APIError } from 'openai'
 import { z } from 'zod'
 import {
-  CODEX_LB_BASE_URL,
-  CODEX_LB_IMAGE_MODEL,
-  CODEX_LB_TEXT_MODEL,
-  loadConfig
+  loadConfig,
+  OPENAI_COMPATIBLE_BASE_URL,
+  OPENAI_IMAGE_MODEL,
+  OPENAI_TEXT_MODEL
 } from '../src/config'
 import { createOpenAIImageClient, ImageProviderError } from '../src/utils/openai-image-client'
 import { createOpenAIClient } from '../src/utils/openai-client'
@@ -43,25 +43,25 @@ const main = async (): Promise<void> => {
 
   const config = await runPhase('configuration', () => loadConfig())
   const sdk = new OpenAI({
-    apiKey: config.codexLbApiKey,
-    baseURL: CODEX_LB_BASE_URL,
+    apiKey: config.openAIApiKey,
+    baseURL: OPENAI_COMPATIBLE_BASE_URL,
     timeout: 30_000,
     maxRetries: 0
   })
   const { modelIds, imageModelListed } = await runPhase('model discovery', async () => {
     const models = await sdk.models.list()
     const modelIds = new Set(models.data.map(model => model.id))
-    assert.ok(modelIds.has(CODEX_LB_TEXT_MODEL), `${CODEX_LB_TEXT_MODEL} was not returned by /models`)
+    assert.ok(modelIds.has(OPENAI_TEXT_MODEL), `${OPENAI_TEXT_MODEL} was not returned by /models`)
     return {
       modelIds,
-      imageModelListed: modelIds.has(CODEX_LB_IMAGE_MODEL)
+      imageModelListed: modelIds.has(OPENAI_IMAGE_MODEL)
     }
   })
 
   const responsesTrace = traceResponsesRequests()
   const { directResponse, toolResponse } = await (async () => {
     try {
-      const textClient = createOpenAIClient({ apiKey: config.codexLbApiKey })
+      const textClient = createOpenAIClient({ apiKey: config.openAIApiKey })
       const directResponse = await runPhase('direct text response', async () => {
         const response = await textClient.prompt({
           systemInstruction: 'Follow the user instruction exactly.',
@@ -126,7 +126,7 @@ const main = async (): Promise<void> => {
   })
 
   const imageResults = runImageTests
-    ? await runImageSmokeTests(config.codexLbApiKey)
+    ? await runImageSmokeTests(config.openAIApiKey)
     : 'skipped' as const
 
   console.log(JSON.stringify({

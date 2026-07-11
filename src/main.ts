@@ -10,10 +10,10 @@ import { createRemixCommand } from './commands/remix'
 import { createRollCommand } from './commands/roll'
 import { createTftiCommand } from './commands/tfti'
 import {
-  CODEX_LB_BASE_URL,
-  CODEX_LB_IMAGE_MODEL,
-  CODEX_LB_TEXT_MODEL,
   loadConfig,
+  OPENAI_COMPATIBLE_BASE_URL,
+  OPENAI_IMAGE_MODEL,
+  OPENAI_TEXT_MODEL,
   PARALLEL_SEARCH_MCP_URL
 } from './config'
 import { PrefixCommand, SlashCommand } from './models/commands'
@@ -32,14 +32,14 @@ const main = async (): Promise<void> => {
   const config = loadConfig()
 
   logger.info({
-    baseUrl: CODEX_LB_BASE_URL,
-    textModel: CODEX_LB_TEXT_MODEL,
-    imageModel: CODEX_LB_IMAGE_MODEL,
+    baseUrl: OPENAI_COMPATIBLE_BASE_URL,
+    textModel: OPENAI_TEXT_MODEL,
+    imageModel: OPENAI_IMAGE_MODEL,
     parallelSearchMcpUrl: PARALLEL_SEARCH_MCP_URL
   }, 'Configuring AI providers')
 
-  const openAIClient = createOpenAIClient({ apiKey: config.codexLbApiKey })
-  const imageClient = createOpenAIImageClient({ apiKey: config.codexLbApiKey })
+  const openAIClient = createOpenAIClient({ apiKey: config.openAIApiKey })
+  const imageClient = createOpenAIImageClient({ apiKey: config.openAIApiKey })
   const colorProvider = createColorProvider()
   const webTools = await createWebTools()
 
